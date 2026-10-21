@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Portrait paper format for the Bank Advice letter (default A4) -->
+    <record id="action_report_payroll_bank_advice" model="ir.actions.report">
+        <field name="name">Bank Advice</field>
+        <field name="model">hr.payslip</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">payroll_bank_advice.payroll_bank_advice_report</field>
+        <field name="report_file">payroll_bank_advice.payroll_bank_advice_report</field>
+        <field name="binding_model_id" ref="hr_payroll.model_hr_payslip"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Landscape paper format for the Salary Rule Summary page -->
+    <record id="paperformat_salary_rule_summary" model="report.paperformat">
+        <field name="name">Payroll Salary Summary (A4 Landscape)</field>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">12</field>
+        <field name="margin_bottom">12</field>
+        <field name="margin_left">10</field>
+        <field name="margin_right">10</field>
+        <field name="header_line">False</field>
+        <field name="header_spacing">3</field>
+    </record>
+
+    <!-- Landscape Salary Rule Summary report action (called programmatically; not bound to list) -->
+    <record id="action_report_salary_rule_summary" model="ir.actions.report">
+        <field name="name">Salary Rule Summary</field>
+        <field name="model">hr.payslip</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">payroll_bank_advice.payroll_bank_advice_salary_summary_report</field>
+        <field name="report_file">payroll_bank_advice.payroll_bank_advice_salary_summary_report</field>
+        <field name="paperformat_id" ref="paperformat_salary_rule_summary"/>
+        <!-- NOT bound: triggered only from action_print_bank_advice Python method -->
+    </record>
+</odoo>

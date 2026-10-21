@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Payroll Bank Advice Manager Group — implied by Payroll Manager -->
+    <record id="group_payroll_bank_advice_manager" model="res.groups">
+        <field name="name">Payroll Bank Advice Manager</field>
+        <field name="implied_ids" eval="[Command.link(ref('hr_payroll.group_hr_payroll_manager'))]"/>
+    </record>
+
+    <!-- Payroll Bank Advice User Group — implied by Payroll User -->
+    <record id="group_payroll_bank_advice_user" model="res.groups">
+        <field name="name">Payroll Bank Advice User</field>
+        <field name="implied_ids" eval="[Command.link(ref('hr_payroll.group_hr_payroll_user'))]"/>
+    </record>
+</odoo>

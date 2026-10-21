@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Payslip Batches Form: Print Bank Advice -->
+    <record id="hr_payslip_run_view_form_inherit_bank_advice" model="ir.ui.view">
+        <field name="name">hr.payslip.run.form.inherit.bank.advice</field>
+        <field name="model">hr.payslip.run</field>
+        <field name="inherit_id" ref="hr_payroll.hr_payslip_run_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button
+                    string="Print Bank Advice"
+                    name="action_print_bank_advice"
+                    type="object"
+                    class="btn-secondary"
+                    icon="fa-university"
+                    invisible="payslip_count == 0"
+                    groups="hr_payroll.group_hr_payroll_user"
+                />
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Payslip Batches List: Print Bank Advice in header -->
+    <record id="hr_payslip_run_view_tree_inherit_bank_advice" model="ir.ui.view">
+        <field name="name">hr.payslip.run.list.inherit.bank.advice</field>
+        <field name="model">hr.payslip.run</field>
+        <field name="inherit_id" ref="hr_payroll.hr_payslip_run_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <header>
+                    <button
+                        string="Print Bank Advice"
+                        name="action_print_bank_advice"
+                        type="object"
+                        class="btn-primary"
+                        icon="fa-university"
+                        groups="hr_payroll.group_hr_payroll_user"
+                    />
+                </header>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action on Payslip Batches to generate Bank Advice -->
+    <record id="action_payslip_run_print_bank_advice" model="ir.actions.server">
+        <field name="name">Print Bank Advice</field>
+        <field name="model_id" ref="hr_payroll.model_hr_payslip_run"/>
+        <field name="binding_model_id" ref="hr_payroll.model_hr_payslip_run"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">
+action = records.action_print_bank_advice()
+        </field>
+    </record>
+</odoo>

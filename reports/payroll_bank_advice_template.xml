@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- =====================================================================
+         TEMPLATE 1: Bank Advice Letter (Portrait, A4)
+         Matches official Ethiopian Corporate Bank Advice Letter
+    ===================================================================== -->
+    <template id="payroll_bank_advice_report">
+        <t t-call="web.html_container">
+            <t t-set="company" t-value="docs[0].company_id if docs else env.company"/>
+            <t t-set="report_data" t-value="docs._prepare_bank_advice_report_data()"/>
+            <t t-set="company_info" t-value="report_data['company']"/>
+
+            <t t-call="web.basic_layout">
+                <style>
+                    body, .page {
+                        font-family: Arial, Helvetica, sans-serif !important;
+                        font-size: 11pt !important;
+                        color: #000000 !important;
+                    }
+                    table.bank-advice-table {
+                        width: 100%;
+                        border-collapse: collapse !important;
+                        margin-bottom: 20px;
+                        font-size: 9.5pt;
+                        page-break-inside: auto;
+                    }
+                    table.bank-advice-table thead {
+                        display: table-header-group;
+                    }
+                    table.bank-advice-table tr {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                    }
+                    table.bank-advice-table th {
+                        background-color: #118B46 !important;
+                        color: #ffffff !important;
+                        font-weight: bold;
+                        border: 1px solid #000000 !important;
+                        padding: 6px 8px !important;
+                        vertical-align: middle;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    table.bank-advice-table td {
+                        border: 1px solid #000000 !important;
+                        padding: 6px 8px !important;
+                        vertical-align: middle;
+                    }
+                    .last-page-guard {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                        margin-top: 15px;
+                    }
+                </style>
+
+                <div class="page">
+                    <t t-foreach="report_data['bank_groups']" t-as="group">
+                        <t t-if="not group_first">
+                            <div style="page-break-before: always; height: 1px;"/>
+                        </t>
+
+                        <!-- 1. CORPORATE HEADER -->
+                        <div style="border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 16px;">
+                            <table style="width: 100%; border-collapse: collapse; border: none !important;">
+                                <tr style="border: none !important;">
+                                    <td style="width: 15%; vertical-align: middle; border: none !important; padding: 0;">
+                                        <t t-if="company_info.get('logo_src')">
+                                            <img t-att-src="company_info['logo_src']" style="max-height: 70px; max-width: 130px; display: block;"/>
+                                        </t>
+                                        <t t-elif="company.logo">
+                                            <img t-att-src="image_data_uri(company.logo)" style="max-height: 70px; max-width: 130px; display: block;"/>
+                                        </t>
+                                    </td>
+                                    <td style="width: 85%; vertical-align: middle; text-align: left; padding-left: 15px; border: none !important;">
+                                        <div style="font-size: 13pt; font-weight: bold; color: #118B46; letter-spacing: 0.5px;">
+                                            <span t-out="company_info.get('company_name') or company.name"/>
+                                        </div>
+                                        <div style="font-size: 9pt; color: #444; margin-top: 2px;">
+                                            <span t-out="company_info.get('company_address')"/>
+                                            <t t-if="company_info.get('company_phone')"> | Tel: <span t-out="company_info.get('company_phone')"/></t>
+                                            <t t-if="company_info.get('company_email')"> | Email: <span t-out="company_info.get('company_email')"/></t>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 2. REF NO & DATE BOX (Top-Right) -->
+                        <table style="width: 220px; border-collapse: collapse; margin-left: auto; margin-bottom: 18px; border: 1px solid #333;">
+                            <tr>
+                                <td style="border: 1px solid #333; padding: 4px 8px; font-size: 9.5pt;">
+                                    <div style="font-weight: bold; color: #000;">Ref.No</div>
+                                    <div style="color: #000;">ቁጥር: <span style="font-weight: bold;" t-out="group.get('reference_number')"/></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #333; padding: 4px 8px; font-size: 9.5pt;">
+                                    <div style="font-weight: bold; color: #000;">Date:</div>
+                                    <div style="color: #000;">ቀን: <span style="font-weight: bold;" t-out="group.get('report_date')"/></div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- 3. ADDRESSEE BANK DETAILS -->
+                        <div style="font-size: 11pt; line-height: 1.4; margin-bottom: 20px; color: #000;">
+                            <div style="font-weight: bold;"><span t-out="group.get('bank_name')"/></div>
+                            <div style="font-weight: bold;"><span t-out="group.get('branch')"/></div>
+                            <div style="font-weight: bold;"><span t-out="group.get('bank_city') or 'Addis Ababa'"/></div>
+                        </div>
+
+                        <!-- 4. SUBJECT -->
+                        <div style="font-size: 11.5pt; font-weight: bold; text-decoration: underline; margin-bottom: 16px; color: #000;">
+                            Subject: <span t-out="group.get('subject') or 'Transfer of Cash'"/>
+                        </div>
+
+                        <!-- 5. BODY PARAGRAPH -->
+                        <div style="font-size: 11pt; line-height: 1.8; text-align: justify; margin-bottom: 20px; color: #000;">
+                            We kindly request you to transfer <strong>Birr <span t-out="'{:,.2f}'.format(group.get('total_amount', 0.0))"/> ( <span t-out="group.get('amount_in_words', '')"/> )</strong> from our current account number <strong><span t-out="group.get('company_account_number', '')"/></strong> maintained with you to the respected Employees Account Numbers which Is Attached with this letter for Payroll Payment for the Month Of <strong><span t-out="group.get('pay_period', '')"/></strong>.
+                        </div>
+
+                        <!-- 6. SALUTATION CLOSING -->
+                        <div style="font-size: 11pt; font-weight: bold; margin-bottom: 20px; color: #000;">
+                            Best Regards
+                        </div>
+
+                        <!-- 7. ATTACHED EMPLOYEE SCHEDULE TABLE -->
+                        <table class="bank-advice-table">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center; width: 5%;">S.N</th>
+                                    <th style="text-align: center; width: 13%;">Emp. ID</th>
+                                    <th style="text-align: left;   width: 28%;">Employee Name</th>
+                                    <th style="text-align: center; width: 22%;">Bank &amp; Branch</th>
+                                    <th style="text-align: center; width: 18%;">Account Number</th>
+                                    <th style="text-align: right;  width: 14%;">Net Amount (ETB)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="group['payslips']" t-as="line">
+                                    <tr>
+                                        <td style="text-align: center;"><span t-out="line['item_no']"/></td>
+                                        <td style="text-align: center; font-weight: 500;"><span t-out="line.get('employee_ref') or line['payslip_number']"/></td>
+                                        <td style="text-align: left;"><span t-out="line['employee_name']"/></td>
+                                        <td style="text-align: center;"><span t-out="line.get('bank_and_branch') or line.get('bank_name')"/></td>
+                                        <td style="text-align: center; font-family: monospace; font-size: 10pt;"><span t-out="line['bank_account_number']"/></td>
+                                        <td style="text-align: right; font-weight: bold;"><span t-out="'{:,.2f}'.format(line['net_salary'])"/></td>
+                                    </tr>
+                                </t>
+                                <tr style="font-weight: bold; background-color: #f0f7f3;">
+                                    <td colspan="5" style="text-align: right; border: 1px solid #000; padding: 6px 8px;">
+                                        Total Transfer Amount (<span t-out="group.get('short_code', 'ETB')"/>):
+                                    </td>
+                                    <td style="text-align: right; border: 1px solid #000; padding: 6px 8px;">
+                                        <span t-out="'{:,.2f}'.format(group.get('total_amount', 0.0))"/> ETB
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- 8. AUTHORIZED SIGNATURE BLOCKS & STAMP AREA -->
+                        <div class="last-page-guard">
+                            <table style="width: 100%; border: none !important; border-collapse: collapse; margin-top: 15px;">
+                                <tr style="border: none !important;">
+                                    <td style="width: 32%; border: none !important; text-align: left; vertical-align: top; padding: 0 10px 0 0;">
+                                        <div style="font-weight: bold; font-size: 10pt; border-bottom: 1px solid #333; padding-bottom: 45px; margin-bottom: 6px;">
+                                            Prepared By:
+                                        </div>
+                                        <div style="font-size: 9pt; color: #333; font-weight: bold;">HR / Payroll Officer</div>
+                                        <div style="font-size: 9pt; color: #555; margin-top: 2px;">Date: __________________</div>
+                                    </td>
+                                    <td style="width: 32%; border: none !important; text-align: left; vertical-align: top; padding: 0 10px;">
+                                        <div style="font-weight: bold; font-size: 10pt; border-bottom: 1px solid #333; padding-bottom: 45px; margin-bottom: 6px;">
+                                            Checked By:
+                                        </div>
+                                        <div style="font-size: 9pt; color: #333; font-weight: bold;">Finance Manager / Audit</div>
+                                        <div style="font-size: 9pt; color: #555; margin-top: 2px;">Date: __________________</div>
+                                    </td>
+                                    <td style="width: 36%; border: none !important; text-align: left; vertical-align: top; padding: 0 0 0 10px;">
+                                        <div style="font-weight: bold; font-size: 10pt; border-bottom: 1px solid #333; padding-bottom: 45px; margin-bottom: 6px;">
+                                            Approved By:
+                                        </div>
+                                        <div style="font-size: 9pt; color: #333; font-weight: bold;">General Manager (GM)</div>
+                                        <div style="font-size: 9pt; color: #555; margin-top: 2px;">Date: __________________</div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div style="margin-top: 12px; text-align: right; font-size: 8.5pt; color: #777;">
+                                [ Official Company Seal / Stamp ]
+                            </div>
+                        </div>
+
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- =====================================================================
+         TEMPLATE 2: Salary Rule Summary (Landscape A4)
+         Called by action_report_salary_rule_summary (rendered per bank group)
+    ===================================================================== -->
+    <template id="payroll_bank_advice_salary_summary_report">
+        <t t-call="web.html_container">
+            <t t-set="company" t-value="docs[0].company_id if docs else env.company"/>
+            <t t-set="report_data" t-value="docs._prepare_bank_advice_report_data()"/>
+            <t t-set="company_info" t-value="report_data['company']"/>
+
+            <t t-call="web.basic_layout">
+                <style>
+                    body, .page {
+                        font-family: Arial, Helvetica, sans-serif !important;
+                        font-size: 9pt !important;
+                        color: #000 !important;
+                    }
+                    table.summary-table {
+                        width: 100%;
+                        border-collapse: collapse !important;
+                        font-size: 8.5pt;
+                        margin-top: 10px;
+                    }
+                    table.summary-table thead {
+                        display: table-header-group;
+                    }
+                    table.summary-table th {
+                        background-color: #1a5276 !important;
+                        color: #ffffff !important;
+                        font-weight: bold;
+                        border: 1px solid #333 !important;
+                        padding: 5px 6px !important;
+                        text-align: center;
+                        vertical-align: middle;
+                        white-space: nowrap;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    table.summary-table td {
+                        border: 1px solid #aaa !important;
+                        padding: 4px 6px !important;
+                        vertical-align: middle;
+                        white-space: nowrap;
+                    }
+                    table.summary-table tr:nth-child(even) td {
+                        background-color: #f0f4f8 !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    table.summary-table tr.total-row td {
+                        background-color: #d5e8d4 !important;
+                        font-weight: bold !important;
+                        border-top: 2px solid #000 !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                </style>
+
+                <div class="page">
+                    <t t-foreach="report_data['bank_groups']" t-as="group">
+                        <t t-if="not group_first">
+                            <div style="page-break-before: always; height: 1px;"/>
+                        </t>
+
+                        <!-- Summary Header -->
+                        <div style="border-bottom: 2px solid #1a5276; padding-bottom: 6px; margin-bottom: 10px;">
+                            <table style="width: 100%; border: none !important;">
+                                <tr style="border: none !important;">
+                                    <td style="width: 70%; border: none !important; padding: 0;">
+                                        <div style="font-size: 12pt; font-weight: bold; color: #1a5276;">
+                                            Payroll Salary Breakdown - <span t-out="group.get('bank_name')"/>
+                                        </div>
+                                        <div style="font-size: 9pt; color: #555;">
+                                            Branch: <span t-out="group.get('branch')"/> | Month: <span t-out="group.get('pay_period')"/> | Employees: <span t-out="group.get('total_employees')"/>
+                                        </div>
+                                    </td>
+                                    <td style="width: 30%; text-align: right; border: none !important; padding: 0;">
+                                        <div style="font-size: 9pt; color: #555;">
+                                            Ref: <span t-out="group.get('reference_number')"/><br/>
+                                            Date: <span t-out="group.get('report_date')"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Summary Matrix Table -->
+                        <t t-set="summary" t-value="group.get('salary_rule_summary', {})"/>
+                        <table class="summary-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 4%;">#</th>
+                                    <th style="width: 10%;">Emp. ID</th>
+                                    <th style="width: 20%; text-align: left;">Employee Name</th>
+                                    <th style="width: 14%;">Payslip</th>
+                                    <t t-foreach="summary.get('rules', [])" t-as="rule">
+                                        <th style="text-align: right;">
+                                            <span t-out="rule['code']"/><br/>
+                                            <small style="font-weight: normal; font-size: 7pt;"><span t-out="rule['name']"/></small>
+                                        </th>
+                                    </t>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="summary.get('lines', [])" t-as="line">
+                                    <tr>
+                                        <td style="text-align: center;"><span t-out="line_index + 1"/></td>
+                                        <td style="text-align: center; font-weight: bold;"><span t-out="line.get('employee_ref') or ''"/></td>
+                                        <td style="text-align: left;"><span t-out="line['employee_name']"/></td>
+                                        <td style="text-align: center;"><span t-out="line['payslip_number']"/></td>
+                                        <t t-foreach="line['amounts']" t-as="amount">
+                                            <td style="text-align: right;">
+                                                <t t-if="amount != 0.0">
+                                                    <span t-out="'{:,.2f}'.format(amount)"/>
+                                                </t>
+                                                <t t-else="">-</t>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="4" style="text-align: right; padding-right: 10px;">
+                                        TOTAL (<span t-out="group.get('short_code', 'ETB')"/>):
+                                    </td>
+                                    <t t-foreach="summary.get('totals', [])" t-as="col_total">
+                                        <td style="text-align: right;">
+                                            <span t-out="'{:,.2f}'.format(col_total)"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Window action — opens form directly so user can fill and save in one step -->
+    <record id="action_payroll_bank_advice_settings" model="ir.actions.act_window">
+        <field name="name">Bank Advice Settings</field>
+        <field name="res_model">payroll.bank.advice.settings</field>
+        <field name="view_mode">list,form</field>
+        <field name="target">current</field>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Menu item under Payroll ▶ Configuration -->
+    <record id="menu_payroll_bank_advice_settings" model="ir.ui.menu">
+        <field name="name">Bank Advice Settings</field>
+        <field name="parent_id" ref="hr_work_entry_contract_enterprise.menu_hr_payroll_configuration"/>
+        <field name="action" ref="action_payroll_bank_advice_settings"/>
+        <field name="sequence">100</field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_payroll_bank_advice_settings_form" model="ir.ui.view">
+        <field name="name">payroll.bank.advice.settings.form</field>
+        <field name="model">payroll.bank.advice.settings</field>
+        <field name="arch" type="xml">
+            <form string="Bank Advice Settings">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="default_bank_name" string="Bank Name"/>
+                        <h1>
+                            <field name="default_bank_name"
+                                   placeholder="e.g. Commercial Bank of Ethiopia (CBE)"/>
+                        </h1>
+                    </div>
+                    <group string="Company &amp; Bank Account">
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_partner_id" invisible="1"/>
+                            <field name="bank_account_id" options="{'no_create': True}"/>
+                            <field name="company_account_name"/>
+                            <field name="company_account_number"/>
+                        </group>
+                        <group>
+                            <field name="branch"/>
+                            <field name="bank_city"/>
+                            <field name="bank_country"/>
+                            <field name="reference_prefix"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- List View -->
+    <record id="view_payroll_bank_advice_settings_list" model="ir.ui.view">
+        <field name="name">payroll.bank.advice.settings.list</field>
+        <field name="model">payroll.bank.advice.settings</field>
+        <field name="arch" type="xml">
+            <list string="Bank Advice Settings">
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="default_bank_name"/>
+                <field name="branch"/>
+                <field name="bank_city"/>
+                <field name="bank_country"/>
+                <field name="company_account_name"/>
+                <field name="company_account_number"/>
+                <field name="reference_prefix"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+</odoo>

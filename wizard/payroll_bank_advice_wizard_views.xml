@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_payroll_bank_advice_wizard_form" model="ir.ui.view">
+        <field name="name">payroll.bank.advice.wizard.form</field>
+        <field name="model">payroll.bank.advice.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Print Bank Advice">
+                <sheet>
+                    <div class="oe_title">
+                        <h2>Print Payroll Bank Advice</h2>
+                        <p class="text-muted">
+                            Generate official bank transfer advice letters and employee schedules matching your company format.
+                        </p>
+                    </div>
+
+                    <group>
+                        <group string="Bank Selection">
+                            <field name="bank_mode" widget="radio"/>
+                            <field name="available_banks" readonly="1" invisible="not available_banks"/>
+                        </group>
+                        <group string="Letter Details">
+                            <field name="subject"/>
+                            <field name="pay_period"/>
+                            <field name="reference_number" placeholder="Auto-generated if left blank"/>
+                            <field name="include_salary_summary"/>
+                        </group>
+                    </group>
+
+                    <group string="Target Bank &amp; Debit Account" invisible="bank_mode != 'single'">
+                        <group>
+                            <field name="target_bank_name" placeholder="e.g. Dashen Bank or Commercial Bank of Ethiopia (CBE)"/>
+                            <field name="branch" placeholder="e.g. Ghion Branch, Bole Branch"/>
+                            <field name="bank_city"/>
+                        </group>
+                        <group>
+                            <field name="company_account_number" placeholder="e.g. 0002034226011"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_confirm_print"
+                            string="Print Bank Advice (PDF)"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-print"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_payroll_bank_advice_wizard" model="ir.actions.act_window">
+        <field name="name">Print Bank Advice</field>
+        <field name="res_model">payroll.bank.advice.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
