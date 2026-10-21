@@ -13,7 +13,7 @@
             <t t-call="web.basic_layout">
                 <style>
                     body, .page {
-                        font-family: Arial, Helvetica, sans-serif !important;
+                        font-family: 'Abyssinica SIL', 'Noto Sans Ethiopic', 'Nyala', Arial, Helvetica, sans-serif !important;
                         font-size: 11pt !important;
                         color: #000000 !important;
                     }
@@ -208,7 +208,7 @@
             <t t-call="web.basic_layout">
                 <style>
                     body, .page {
-                        font-family: Arial, Helvetica, sans-serif !important;
+                        font-family: 'Abyssinica SIL', 'Noto Sans Ethiopic', 'Nyala', Arial, Helvetica, sans-serif !important;
                         font-size: 9pt !important;
                         color: #000 !important;
                     }
