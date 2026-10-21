@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Bank Branch field to Employee form view under Private Information -->
+    <record id="view_employee_form_inherit_bank_branch" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.bank.branch</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="priority">30</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='bank_account_id']" position="after">
+                <field name="bank_branch" placeholder="e.g. Bole Branch, Ghion Branch"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add Branch field to ResPartnerBank form view -->
+    <record id="view_partner_bank_form_inherit_branch" model="ir.ui.view">
+        <field name="name">res.partner.bank.form.inherit.branch</field>
+        <field name="model">res.partner.bank</field>
+        <field name="inherit_id" ref="base.view_partner_bank_form"/>
+        <field name="priority">30</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='bank_id']" position="after">
+                <field name="branch" placeholder="e.g. Bole Branch, Ghion Branch"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add Branch field to ResPartnerBank list/tree view -->
+    <record id="view_partner_bank_tree_inherit_branch" model="ir.ui.view">
+        <field name="name">res.partner.bank.list.inherit.branch</field>
+        <field name="model">res.partner.bank</field>
+        <field name="inherit_id" ref="base.view_partner_bank_tree"/>
+        <field name="priority">30</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='bank_name']" position="after">
+                <field name="branch" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

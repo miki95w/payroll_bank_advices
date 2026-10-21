@@ -52,11 +52,18 @@ class HrPayslip(models.Model):
         raw_branch = ''
 
         if bank_acc:
+            if getattr(bank_acc, 'branch', False):
+                raw_branch = (bank_acc.branch or '').strip()
+            if not raw_branch and hasattr(employee, 'bank_branch') and employee.bank_branch:
+                raw_branch = (employee.bank_branch or '').strip()
             if bank_acc.bank_id:
                 raw_bank_name = (bank_acc.bank_id.name or '').strip()
-                raw_branch = (bank_acc.bank_id.street or '').strip()
+                if not raw_branch:
+                    raw_branch = (getattr(bank_acc.bank_id, 'branch', '') or getattr(bank_acc.bank_id, 'street', '') or '').strip()
             if not raw_bank_name:
                 raw_bank_name = (bank_acc.bank_name or '').strip()
+        elif hasattr(employee, 'bank_branch') and employee.bank_branch:
+            raw_branch = (employee.bank_branch or '').strip()
 
         # Known Ethiopian Bank Families
         KNOWN_ETHIOPIAN_BANKS = [
@@ -142,7 +149,7 @@ class HrPayslip(models.Model):
             'bank_group_key': bank_group_key,
             'short_code': short_code,
             'bank_name': bank_group_key,
-            'branch': branch or 'Main Branch',
+            'branch': branch or raw_branch or '-',
             'display_bank_branch': display_bank_branch,
             'bank_account_number': account_number or '-',
         }

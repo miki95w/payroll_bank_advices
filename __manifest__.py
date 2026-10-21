@@ -19,6 +19,7 @@
         'views/payroll_bank_advice_settings.xml',
         'views/hr_payslip_views.xml',
         'views/hr_payslip_run_views.xml',
+        'views/hr_employee_views.xml',
         'reports/payroll_bank_advice_report.xml',
         'reports/payroll_bank_advice_template.xml',
     ],
