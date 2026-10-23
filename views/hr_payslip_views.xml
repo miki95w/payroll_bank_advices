@@ -19,6 +19,14 @@
                     icon="fa-university"
                     groups="hr_payroll.group_hr_payroll_user"
                 />
+                <button
+                    name="action_open_payroll_report"
+                    string="Payroll Report (Excel)"
+                    type="object"
+                    class="btn-secondary"
+                    icon="fa-file-excel-o"
+                    groups="hr_payroll.group_hr_payroll_user"
+                />
             </xpath>
         </field>
     </record>
@@ -36,6 +44,15 @@
                     type="object"
                     class="btn-secondary"
                     icon="fa-university"
+                    groups="hr_payroll.group_hr_payroll_user"
+                    invisible="state == 'cancel'"
+                />
+                <button
+                    name="action_open_payroll_report"
+                    string="Payroll Report (Excel)"
+                    type="object"
+                    class="btn-secondary"
+                    icon="fa-file-excel-o"
                     groups="hr_payroll.group_hr_payroll_user"
                     invisible="state == 'cancel'"
                 />
