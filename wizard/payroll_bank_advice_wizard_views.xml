@@ -22,6 +22,7 @@
                             <field name="subject"/>
                             <field name="pay_period"/>
                             <field name="reference_number" placeholder="Auto-generated if left blank"/>
+                            <field name="print_branch"/>
                             <field name="include_salary_summary"/>
                         </group>
                     </group>
