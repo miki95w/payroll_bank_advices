@@ -16,6 +16,15 @@
                     invisible="payslip_count == 0"
                     groups="hr_payroll.group_hr_payroll_user"
                 />
+                <button
+                    string="Payroll Report (Excel)"
+                    name="action_open_payroll_report"
+                    type="object"
+                    class="btn-secondary"
+                    icon="fa-file-excel-o"
+                    invisible="payslip_count == 0"
+                    groups="hr_payroll.group_hr_payroll_user"
+                />
             </xpath>
         </field>
     </record>
@@ -34,6 +43,14 @@
                         type="object"
                         class="btn-primary"
                         icon="fa-university"
+                        groups="hr_payroll.group_hr_payroll_user"
+                    />
+                    <button
+                        string="Payroll Report"
+                        name="action_open_payroll_report"
+                        type="object"
+                        class="btn-secondary"
+                        icon="fa-file-excel-o"
                         groups="hr_payroll.group_hr_payroll_user"
                     />
                 </header>
