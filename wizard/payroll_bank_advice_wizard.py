@@ -62,9 +62,14 @@ class PayrollBankAdviceWizard(models.TransientModel):
         string='Reference Number',
         help='Custom reference number. Leave blank to auto-generate (e.g. CBE/BA/2026/09/001)',
     )
+    print_branch = fields.Boolean(
+        string='Print Bank Branch',
+        default=True,
+        help='If checked, prints Bank Name and Branch in separate columns on the Bank Advice PDF.',
+    )
     include_salary_summary = fields.Boolean(
         string='Include Salary Rule Breakdown (Landscape)',
-        default=True,
+        default=False,
         help='Include the landscape page breaking down salary earnings and deductions per employee',
     )
 
@@ -160,6 +165,7 @@ class PayrollBankAdviceWizard(models.TransientModel):
             'pay_period': self.pay_period,
             'subject': self.subject,
             'reference_number': self.reference_number,
+            'print_branch': self.print_branch,
             'include_salary_summary': self.include_salary_summary,
         }
         return self.payslip_ids._render_and_merge_bank_advice(wizard_vals=wizard_vals)
