@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Payroll Report Wizard Form View -->
+    <record id="view_payroll_report_wizard_form" model="ir.ui.view">
+        <field name="name">payroll.report.wizard.form</field>
+        <field name="model">payroll.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Payroll Report">
+                <sheet>
+                    <div class="oe_title">
+                        <h2>Payroll Report</h2>
+                        <p class="text-muted">
+                            Generate comprehensive Salary &amp; Deductions breakdown reports in Excel (.xlsx) or PDF format.
+                        </p>
+                    </div>
+
+                    <group>
+                        <group string="Period &amp; Source">
+                            <field name="filter_by" widget="radio"/>
+                            <field name="payslip_run_id"
+                                   invisible="filter_by != 'batch'"
+                                   required="filter_by == 'batch'"
+                                   options="{'no_create': True}"/>
+                            <label for="date_from" string="Period" invisible="filter_by != 'date'"/>
+                            <div class="d-flex gap-2 align-items-center" invisible="filter_by != 'date'">
+                                <field name="date_from" required="filter_by == 'date'"/>
+                                <span>to</span>
+                                <field name="date_to" required="filter_by == 'date'"/>
+                            </div>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Filters &amp; Options">
+                            <field name="department_ids" widget="many2many_tags" placeholder="All Departments"/>
+                            <field name="employee_ids" widget="many2many_tags" placeholder="All Employees"/>
+                            <field name="bank_name" placeholder="e.g. CBE, Dashen (All if empty)"/>
+                            <field name="separate_sheets_by_bank"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_generate_xlsx"
+                            string="Download Excel Report"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-file-excel-o"/>
+                    <button name="action_generate_pdf"
+                            string="Print PDF Summary"
+                            type="object"
+                            class="btn-secondary"
+                            icon="fa-file-pdf-o"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Window Action: Open Payroll Report Wizard -->
+    <record id="action_payroll_report_wizard" model="ir.actions.act_window">
+        <field name="name">Payroll Report</field>
+        <field name="res_model">payroll.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item: Placed inside Payroll Reporting Menu -->
+    <menuitem
+        id="menu_payroll_report"
+        name="Payroll Report"
+        parent="hr_payroll.menu_hr_payroll_report"
+        action="action_payroll_report_wizard"
+        sequence="15"
+        groups="hr_payroll.group_hr_payroll_user"
+    />
+
+    <!-- Contextual Action on Payslip Batches (Payslip Runs) -->
+    <record id="action_payslip_run_open_payroll_report" model="ir.actions.server">
+        <field name="name">Payroll Report (Excel)</field>
+        <field name="model_id" ref="hr_payroll.model_hr_payslip_run"/>
+        <field name="binding_model_id" ref="hr_payroll.model_hr_payslip_run"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">
+action = records.action_open_payroll_report()
+        </field>
+    </record>
+
+    <!-- Contextual Action on Payslips -->
+    <record id="action_payslip_open_payroll_report" model="ir.actions.server">
+        <field name="name">Payroll Report (Excel)</field>
+        <field name="model_id" ref="hr_payroll.model_hr_payslip"/>
+        <field name="binding_model_id" ref="hr_payroll.model_hr_payslip"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+action = records.action_open_payroll_report()
+        </field>
+    </record>
+</odoo>
