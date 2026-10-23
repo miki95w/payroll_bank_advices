@@ -413,6 +413,10 @@ class HrPayslip(models.Model):
         # 1. Gather all payslips data
         all_payslip_data = [slip._get_payslip_data() for slip in self]
 
+        print_branch = wizard_vals.get('print_branch', True)
+        if 'print_branch' not in wizard_vals and 'print_branch' in self.env.context:
+            print_branch = self.env.context['print_branch']
+
         # 2. Filter by single bank if requested
         bank_mode = wizard_vals.get('bank_mode', 'all')
         target_bank = wizard_vals.get('target_bank_name')
@@ -507,6 +511,7 @@ class HrPayslip(models.Model):
                 'total_employees': len(slips_data),
                 'payslips': numbered_slips,
                 'salary_rule_summary': summary,
+                'print_branch': print_branch,
             })
             group_idx += 1
 
@@ -515,6 +520,7 @@ class HrPayslip(models.Model):
             'pay_period': pay_period,
             'subject': subject,
             'report_date': report_date_str,
+            'print_branch': print_branch,
             'bank_groups': bank_groups,
         }
 
@@ -550,10 +556,27 @@ class HrPayslip(models.Model):
             }
         }
 
+    def action_open_payroll_report(self):
+        """ Open Payroll Report Wizard for selected payslips """
+        valid_slips = self.filtered(lambda p: p.state != 'cancel')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Payroll Report'),
+            'res_model': 'payroll.report.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_filter_by': 'date',
+                'default_employee_ids': valid_slips.mapped('employee_id').ids,
+                'default_date_from': min(valid_slips.mapped('date_from')) if valid_slips else fields.Date.today(),
+                'default_date_to': max(valid_slips.mapped('date_to')) if valid_slips else fields.Date.today(),
+            }
+        }
+
     def _render_and_merge_bank_advice(self, wizard_vals=None):
         """
-        Generates the Bank Advice Letter and optional Landscape Summary PDF,
-        merging them per bank group.
+        Generates the Bank Advice Letter PDF, with separate Bank and Branch columns.
+        If include_salary_summary is requested, appends the Landscape Salary Summary.
         """
         valid_slips = self.filtered(lambda p: p.state != 'cancel')
         if not valid_slips:
@@ -561,48 +584,41 @@ class HrPayslip(models.Model):
 
         context = dict(self.env.context, bank_advice_wizard_vals=wizard_vals or {})
 
-        # 1. Generate Portrait Bank Advice Letter PDF
+        # Generate Portrait Bank Advice Letter PDF
         bank_advice_report = self.env.ref('payroll_bank_advice.action_report_payroll_bank_advice')
         bank_advice_pdf, _ = bank_advice_report.with_context(context).sudo()._render_qweb_pdf(
             bank_advice_report, valid_slips.ids
         )
 
-        include_summary = (wizard_vals or {}).get('include_salary_summary', True)
-        summary_pdf = None
+        merged_pdf_bytes = bank_advice_pdf
+        include_summary = (wizard_vals or {}).get('include_salary_summary', False)
         if include_summary:
             summary_report = self.env.ref('payroll_bank_advice.action_report_salary_rule_summary')
             summary_pdf, _ = summary_report.with_context(context).sudo()._render_qweb_pdf(
                 summary_report, valid_slips.ids
             )
-
-        # 2. Merge PDFs
-        try:
-            from pypdf import PdfWriter, PdfReader
-        except ImportError:
             try:
-                from PyPDF2 import PdfWriter, PdfReader
+                from pypdf import PdfWriter, PdfReader
             except ImportError:
-                from PyPDF2 import PdfFileWriter as PdfWriter, PdfFileReader as PdfReader
+                try:
+                    from PyPDF2 import PdfWriter, PdfReader
+                except ImportError:
+                    from PyPDF2 import PdfFileWriter as PdfWriter, PdfFileReader as PdfReader
 
-        writer = PdfWriter()
-        pdf_list = [bank_advice_pdf]
-        if summary_pdf:
-            pdf_list.append(summary_pdf)
+            writer = PdfWriter()
+            for pdf_bytes in [bank_advice_pdf, summary_pdf]:
+                reader = PdfReader(io.BytesIO(pdf_bytes))
+                pages = reader.pages if hasattr(reader, 'pages') else [reader.getPage(i) for i in range(reader.getNumPages())]
+                for page in pages:
+                    if hasattr(writer, 'add_page'):
+                        writer.add_page(page)
+                    else:
+                        writer.addPage(page)
 
-        for pdf_bytes in pdf_list:
-            reader = PdfReader(io.BytesIO(pdf_bytes))
-            pages = reader.pages if hasattr(reader, 'pages') else [reader.getPage(i) for i in range(reader.getNumPages())]
-            for page in pages:
-                if hasattr(writer, 'add_page'):
-                    writer.add_page(page)
-                else:
-                    writer.addPage(page)
+            out_stream = io.BytesIO()
+            writer.write(out_stream)
+            merged_pdf_bytes = out_stream.getvalue()
 
-        out_stream = io.BytesIO()
-        writer.write(out_stream)
-        merged_pdf_bytes = out_stream.getvalue()
-
-        # 3. Create attachment and return URL
         today_str = fields.Date.today().strftime('%Y%m%d')
         filename = f"Bank_Advice_{today_str}.pdf"
 
@@ -641,5 +657,21 @@ class HrPayslipRun(models.Model):
                 'default_payslip_run_id': self.id if len(self) == 1 else False,
                 'active_ids': valid_slips.ids,
                 'active_model': 'hr.payslip',
+            }
+        }
+
+    def action_open_payroll_report(self):
+        """ Open Payroll Report Wizard for selected payslip batch """
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Payroll Report'),
+            'res_model': 'payroll.report.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_filter_by': 'batch',
+                'default_payslip_run_id': self.id,
+                'default_company_id': self.company_id.id if hasattr(self, 'company_id') and self.company_id else self.env.company.id,
             }
         }
