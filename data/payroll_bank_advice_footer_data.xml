@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- 1. Head Office (ዋና መ/ቤት) -->
+    <record id="footer_config_head_office" model="payroll.bank.advice.footer.config">
+        <field name="name">Head Office</field>
+        <field name="sequence">10</field>
+        <field name="classification">head_office</field>
+        <field name="footer_line_1">Tel No.: +251-115-54-97-84/91/94 FAX: +251-113-69-81-00/</field>
+        <field name="footer_line_2">P.O.BOX: 5787, Addis Ababa, Ethiopia</field>
+        <field name="footer_line_3">E-mail: contact@midroc-ceo.com website: www.midroc-ethiopiagroup.com</field>
+        <field name="prepared_by_label">Prepared By:</field>
+        <field name="prepared_by_title">HR / Payroll Officer</field>
+        <field name="approved_by_label">Approved By:</field>
+        <field name="approved_by_title">General Manager (GM)</field>
+        <field name="show_seal" eval="True"/>
+    </record>
+
+    <!-- 2. CPW -->
+    <record id="footer_config_cpw" model="payroll.bank.advice.footer.config">
+        <field name="name">CPW</field>
+        <field name="sequence">20</field>
+        <field name="classification">cpw</field>
+        <field name="footer_line_1">Tel No.: +251-115-54-97-84/91/94 FAX: +251-113-69-81-00/</field>
+        <field name="footer_line_2">P.O.BOX: 5787, Addis Ababa, Ethiopia</field>
+        <field name="footer_line_3">E-mail: contact@midroc-ceo.com website: www.midroc-ethiopiagroup.com</field>
+        <field name="prepared_by_label">Prepared By:</field>
+        <field name="prepared_by_title">CPW Coordinator</field>
+        <field name="approved_by_label">Approved By:</field>
+        <field name="approved_by_title">Project Manager</field>
+        <field name="show_seal" eval="True"/>
+    </record>
+
+    <!-- 3. Farm Staff (የእርሻ) -->
+    <record id="footer_config_farm_permanent" model="payroll.bank.advice.footer.config">
+        <field name="name">Farm Staff</field>
+        <field name="sequence">30</field>
+        <field name="classification">permanent</field>
+        <field name="footer_line_1">Tel No.: +251-115-54-97-84/91/94 FAX: +251-113-69-81-00/</field>
+        <field name="footer_line_2">P.O.BOX: 5787, Addis Ababa, Ethiopia</field>
+        <field name="footer_line_3">E-mail: contact@midroc-ceo.com website: www.midroc-ethiopiagroup.com</field>
+        <field name="prepared_by_label">Prepared By:</field>
+        <field name="prepared_by_title">Farm HR / Administrator</field>
+        <field name="approved_by_label">Approved By:</field>
+        <field name="approved_by_title">Farm / Project Manager</field>
+        <field name="show_seal" eval="True"/>
+    </record>
+
+    <!-- 4. Temporary Workers (ጊዜያዊ) -->
+    <record id="footer_config_temporary" model="payroll.bank.advice.footer.config">
+        <field name="name">Temporary Workers</field>
+        <field name="sequence">40</field>
+        <field name="classification">temporary</field>
+        <field name="footer_line_1">Tel No.: +251-115-54-97-84/91/94 FAX: +251-113-69-81-00/</field>
+        <field name="footer_line_2">P.O.BOX: 5787, Addis Ababa, Ethiopia</field>
+        <field name="footer_line_3">E-mail: contact@midroc-ceo.com website: www.midroc-ethiopiagroup.com</field>
+        <field name="prepared_by_label">Prepared By:</field>
+        <field name="prepared_by_title">Field Timekeeper / HR</field>
+        <field name="approved_by_label">Approved By:</field>
+        <field name="approved_by_title">Farm / Operations Manager</field>
+        <field name="show_seal" eval="True"/>
+    </record>
+
+    <!-- 5. Seasonal / Zemach Workers (ዘመች) -->
+    <record id="footer_config_zemach" model="payroll.bank.advice.footer.config">
+        <field name="name">Seasonal / Zemach Workers</field>
+        <field name="sequence">50</field>
+        <field name="classification">zemach</field>
+        <field name="footer_line_1">Tel No.: +251-115-54-97-84/91/94 FAX: +251-113-69-81-00/</field>
+        <field name="footer_line_2">P.O.BOX: 5787, Addis Ababa, Ethiopia</field>
+        <field name="footer_line_3">E-mail: contact@midroc-ceo.com website: www.midroc-ethiopiagroup.com</field>
+        <field name="prepared_by_label">Prepared By:</field>
+        <field name="prepared_by_title">Camp Admin / Timekeeper</field>
+        <field name="approved_by_label">Approved By:</field>
+        <field name="approved_by_title">Farm General Manager</field>
+        <field name="show_seal" eval="True"/>
+    </record>
+</odoo>

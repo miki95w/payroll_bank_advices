@@ -4,3 +4,6 @@ access_payroll_bank_advice_settings_user,payroll.bank.advice.settings.user,model
 access_payroll_bank_advice_settings_other,payroll.bank.advice.settings.other,model_payroll_bank_advice_settings,base.group_user,1,1,1,0
 access_payroll_bank_advice_wizard_user,payroll.bank.advice.wizard.user,model_payroll_bank_advice_wizard,base.group_user,1,1,1,1
 access_payroll_report_wizard_user,payroll.report.wizard.user,model_payroll_report_wizard,base.group_user,1,1,1,1
+access_payroll_bank_advice_footer_config_manager,payroll.bank.advice.footer.config.manager,model_payroll_bank_advice_footer_config,group_payroll_bank_advice_manager,1,1,1,1
+access_payroll_bank_advice_footer_config_user,payroll.bank.advice.footer.config.user,model_payroll_bank_advice_footer_config,group_payroll_bank_advice_user,1,1,1,1
+access_payroll_bank_advice_footer_config_other,payroll.bank.advice.footer.config.other,model_payroll_bank_advice_footer_config,base.group_user,1,1,1,0

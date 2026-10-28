@@ -15,9 +15,11 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'data/payroll_bank_advice_footer_data.xml',
         'wizard/payroll_bank_advice_wizard_views.xml',
         'wizard/payroll_report_wizard_views.xml',
         'views/payroll_bank_advice_settings.xml',
+        'views/payroll_bank_advice_footer_config_views.xml',
         'views/hr_payslip_views.xml',
         'views/hr_payslip_run_views.xml',
         'views/hr_employee_views.xml',

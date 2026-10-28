@@ -178,12 +178,14 @@ class HrPayslip(models.Model):
             payslip_number = self.name or ''
 
         emp_ref = getattr(employee, 'fms_employee_id', False) or getattr(employee, 'barcode', False) or getattr(employee, 'identification_id', False) or str(employee.id)
+        emp_classification = getattr(employee, 'farm_employee_type', False) or getattr(self, 'farm_employee_type', False) or 'head_office'
 
         return {
             'payslip_id': self.id,
             'payslip_number': payslip_number,
             'employee_ref': emp_ref,
             'employee_name': employee.name or '',
+            'classification': emp_classification,
             'bank_group_key': bank_info['bank_group_key'],
             'short_code': bank_info['short_code'],
             'bank_name': bank_info['bank_name'],
@@ -410,8 +412,18 @@ class HrPayslip(models.Model):
         company_info = self[0]._get_company_info()
         company = (self[0].company_id or self.env.company).sudo()
 
-        # 1. Gather all payslips data
-        all_payslip_data = [slip._get_payslip_data() for slip in self]
+        # 1. Gather all payslips data (filtered by classification if requested)
+        target_classification = wizard_vals.get('employee_classification')
+        if target_classification and target_classification != 'all':
+            slips_to_process = self.filtered(
+                lambda s: (getattr(s.employee_id, 'farm_employee_type', False) or getattr(s, 'farm_employee_type', False)) == target_classification
+            )
+            if not slips_to_process:
+                slips_to_process = self
+        else:
+            slips_to_process = self
+
+        all_payslip_data = [slip._get_payslip_data() for slip in slips_to_process]
 
         print_branch = wizard_vals.get('print_branch', True)
         if 'print_branch' not in wizard_vals and 'print_branch' in self.env.context:
@@ -437,7 +449,7 @@ class HrPayslip(models.Model):
         bank_groups = []
         group_idx = 1
         for b_key, slips_data in groups_dict.items():
-            group_slips_records = self.filtered(lambda s: s.id in [p['payslip_id'] for p in slips_data])
+            group_slips_records = slips_to_process.filtered(lambda s: s.id in [p['payslip_id'] for p in slips_data])
 
             total_amount = sum(p['net_salary'] for p in slips_data)
             amount_in_words = self._amount_to_words(total_amount)
@@ -495,6 +507,28 @@ class HrPayslip(models.Model):
             # Salary breakdown for this bank group
             summary = self._prepare_salary_rule_summary_for_slips(group_slips_records)
 
+            # Footer resolution based on employee classification
+            first_slip_class = slips_data[0].get('classification') if slips_data else 'head_office'
+            effective_class = target_classification if (target_classification and target_classification != 'all') else first_slip_class
+
+            footer_config = self.env['payroll.bank.advice.footer.config'].get_footer_for_classification(
+                effective_class, company_id=company.id
+            )
+            defaults = self.env['payroll.bank.advice.footer.config'].get_default_footer_vals(effective_class)
+
+            prep_label = (footer_config.prepared_by_label if footer_config else False) or defaults['prepared_by_label']
+            prep_title = (footer_config.prepared_by_title if footer_config else False) or defaults['prepared_by_title']
+            appr_label = (footer_config.approved_by_label if footer_config else False) or defaults['approved_by_label']
+            appr_title = (footer_config.approved_by_title if footer_config else False) or defaults['approved_by_title']
+            footer_note = (footer_config.footer_note if footer_config else False) or ''
+            show_seal = footer_config.show_seal if footer_config else True
+            seal_text = (footer_config.seal_text if footer_config else False) or '[ Official Company Seal / Stamp ]'
+
+            # Letterhead Page Footer Lines (as in user screenshot)
+            footer_line_1 = (footer_config.footer_line_1 if footer_config else False) or defaults['footer_line_1']
+            footer_line_2 = (footer_config.footer_line_2 if footer_config else False) or defaults['footer_line_2']
+            footer_line_3 = (footer_config.footer_line_3 if footer_config else False) or defaults['footer_line_3']
+
             bank_groups.append({
                 'bank_name': b_key,
                 'short_code': slips_data[0].get('short_code', 'CBE'),
@@ -512,11 +546,33 @@ class HrPayslip(models.Model):
                 'payslips': numbered_slips,
                 'salary_rule_summary': summary,
                 'print_branch': print_branch,
+                'prepared_by_label': prep_label,
+                'prepared_by_title': prep_title,
+                'approved_by_label': appr_label,
+                'approved_by_title': appr_title,
+                'footer_note': footer_note or '',
+                'show_seal': show_seal,
+                'seal_text': seal_text,
+                'classification': effective_class,
+                'footer_line_1': footer_line_1,
+                'footer_line_2': footer_line_2,
+                'footer_line_3': footer_line_3,
             })
             group_idx += 1
 
+        top_footer_config = self.env['payroll.bank.advice.footer.config'].get_footer_for_classification(
+            target_classification, company_id=company.id
+        )
+        top_defaults = self.env['payroll.bank.advice.footer.config'].get_default_footer_vals(target_classification)
+        footer_info = {
+            'footer_line_1': (top_footer_config.footer_line_1 if top_footer_config else False) or top_defaults['footer_line_1'],
+            'footer_line_2': (top_footer_config.footer_line_2 if top_footer_config else False) or top_defaults['footer_line_2'],
+            'footer_line_3': (top_footer_config.footer_line_3 if top_footer_config else False) or top_defaults['footer_line_3'],
+        }
+
         return {
             'company': company_info,
+            'footer_info': footer_info,
             'pay_period': pay_period,
             'subject': subject,
             'report_date': report_date_str,

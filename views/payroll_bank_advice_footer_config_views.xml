@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action -->
+    <record id="action_payroll_bank_advice_footer_config" model="ir.actions.act_window">
+        <field name="name">Bank Advice Footers</field>
+        <field name="res_model">payroll.bank.advice.footer.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="target">current</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure Classification-Based Bank Advice Footers and Signatories!
+            </p>
+            <p>
+                Set up specific Letterhead Footers (Tel No., Fax, P.O. Box, Email, Website) and Signatory titles for Head Office, CPW, Farm, etc.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu item under Payroll ▶ Configuration -->
+    <record id="menu_payroll_bank_advice_footer_config" model="ir.ui.menu">
+        <field name="name">Bank Advice Footers</field>
+        <field name="parent_id" ref="hr_work_entry_contract_enterprise.menu_hr_payroll_configuration"/>
+        <field name="action" ref="action_payroll_bank_advice_footer_config"/>
+        <field name="sequence">101</field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_payroll_bank_advice_footer_config_form" model="ir.ui.view">
+        <field name="name">payroll.bank.advice.footer.config.form</field>
+        <field name="model">payroll.bank.advice.footer.config</field>
+        <field name="arch" type="xml">
+            <form string="Bank Advice Footer Configuration">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Configuration Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Head Office, CPW, Farm Staff"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Classification &amp; Scope">
+                            <field name="classification"/>
+                            <field name="sequence"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_partner_id" invisible="1"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group string="Debit Bank Preference">
+                            <field name="bank_account_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+
+                    <group string="Letterhead Page Footer (Printed at Bottom of Every Advice Letter)">
+                        <field name="footer_line_1" placeholder="e.g. Tel No.: +251-115-54-97-84/91/94 FAX: +251-113-69-81-00/"/>
+                        <field name="footer_line_2" placeholder="e.g. P.O.BOX: 5787, Addis Ababa, Ethiopia"/>
+                        <field name="footer_line_3" placeholder="e.g. E-mail: contact@midroc-ceo.com website: www.midroc-ethiopiagroup.com"/>
+                    </group>
+
+                    <group string="Signatories (Printed on Paper Advice Automatically)">
+                        <group string="Signatory 1: Prepared By">
+                            <field name="prepared_by_label"/>
+                            <field name="prepared_by_title" placeholder="e.g. HR / Payroll Officer or Farm HR"/>
+                        </group>
+                        <group string="Signatory 2: Approved By">
+                            <field name="approved_by_label"/>
+                            <field name="approved_by_title" placeholder="e.g. General Manager (GM) or Farm Manager"/>
+                        </group>
+                    </group>
+
+                    <group string="Additional Remarks &amp; Official Seal">
+                        <field name="footer_note" placeholder="Optional notes, instructions, or legal memo printed above the signature blocks..."/>
+                        <field name="show_seal"/>
+                        <field name="seal_text" invisible="not show_seal"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- List View -->
+    <record id="view_payroll_bank_advice_footer_config_list" model="ir.ui.view">
+        <field name="name">payroll.bank.advice.footer.config.list</field>
+        <field name="model">payroll.bank.advice.footer.config</field>
+        <field name="arch" type="xml">
+            <list string="Bank Advice Footers">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="classification"/>
+                <field name="footer_line_1"/>
+                <field name="footer_line_2"/>
+                <field name="prepared_by_title"/>
+                <field name="approved_by_title"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+</odoo>

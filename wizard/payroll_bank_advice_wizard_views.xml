@@ -9,12 +9,15 @@
                     <div class="oe_title">
                         <h2>Print Payroll Bank Advice</h2>
                         <p class="text-muted">
-                            Generate official bank transfer advice letters and employee schedules matching your company format.
+                            Generate official bank advice letters. The configured signatories and letterhead footer are automatically applied based on the selected employee classification.
                         </p>
                     </div>
 
                     <group>
-                        <group string="Bank Selection">
+                        <group string="Classification &amp; Bank Scope">
+                            <field name="employee_classification" widget="selection"/>
+                            <field name="all_payslip_ids" invisible="1"/>
+                            <field name="payslip_count" string="Included Payslips" readonly="1"/>
                             <field name="bank_mode" widget="radio"/>
                             <field name="available_banks" readonly="1" invisible="not available_banks"/>
                         </group>

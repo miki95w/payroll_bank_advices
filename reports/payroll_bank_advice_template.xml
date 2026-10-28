@@ -9,13 +9,34 @@
             <t t-set="company" t-value="docs[0].company_id if docs else env.company"/>
             <t t-set="report_data" t-value="docs._prepare_bank_advice_report_data()"/>
             <t t-set="company_info" t-value="report_data['company']"/>
+            <t t-set="footer_info" t-value="report_data.get('footer_info', {})"/>
 
             <t t-call="web.basic_layout">
+                <!-- WKHTMLTOPDF FIXED BOTTOM PAGE FOOTER (Matches Midroc Letterhead) -->
+                <div class="footer" style="font-family: Arial, Helvetica, sans-serif !important; width: 100%;">
+                    <div style="border-top: 1.5px solid #222; padding-top: 5px; text-align: center; font-size: 8.5pt; color: #111; line-height: 1.45;">
+                        <t t-if="footer_info.get('footer_line_1')">
+                            <div><span t-out="footer_info['footer_line_1']"/></div>
+                        </t>
+                        <t t-if="footer_info.get('footer_line_2')">
+                            <div><span t-out="footer_info['footer_line_2']"/></div>
+                        </t>
+                        <t t-if="footer_info.get('footer_line_3')">
+                            <div><span t-out="footer_info['footer_line_3']"/></div>
+                        </t>
+                    </div>
+                </div>
+
                 <style>
                     body, .page {
                         font-family: 'Abyssinica SIL', 'Noto Sans Ethiopic', 'Nyala', Arial, Helvetica, sans-serif !important;
                         font-size: 11pt !important;
                         color: #000000 !important;
+                    }
+                    @media print {
+                        .letterhead-page-footer {
+                            display: none;
+                        }
                     }
                     table.bank-advice-table {
                         width: 100%;
@@ -164,36 +185,59 @@
                             </tbody>
                         </table>
 
-                        <!-- 8. AUTHORIZED SIGNATURE BLOCKS & STAMP AREA -->
+                        <!-- 8. AUTHORIZED SIGNATURE BLOCKS & STAMP AREA (2-SIGNATORY FORMAT) -->
                         <div class="last-page-guard">
+                            <t t-if="group.get('footer_note')">
+                                <div style="font-size: 9.5pt; font-style: italic; color: #333; margin-top: 10px; margin-bottom: 14px; line-height: 1.5; padding: 6px 10px; background-color: #fcfcfc; border-left: 3px solid #118B46;">
+                                    <span t-out="group.get('footer_note')"/>
+                                </div>
+                            </t>
                             <table style="width: 100%; border: none !important; border-collapse: collapse; margin-top: 15px;">
                                 <tr style="border: none !important;">
-                                    <td style="width: 32%; border: none !important; text-align: left; vertical-align: top; padding: 0 10px 0 0;">
+                                    <!-- Prepared By (Left Column) -->
+                                    <td style="width: 48%; border: none !important; text-align: left; vertical-align: top; padding: 0 15px 0 0;">
                                         <div style="font-weight: bold; font-size: 10pt; border-bottom: 1px solid #333; padding-bottom: 45px; margin-bottom: 6px;">
-                                            Prepared By:
+                                            <span t-out="group.get('prepared_by_label', 'Prepared By:')"/>
                                         </div>
-                                        <div style="font-size: 9pt; color: #333; font-weight: bold;">HR / Payroll Officer</div>
-                                        <div style="font-size: 9pt; color: #555; margin-top: 2px;">Date: __________________</div>
+                                        <div style="font-size: 9.5pt; color: #111; font-weight: bold;">
+                                            <span t-out="group.get('prepared_by_title', 'HR / Payroll Officer')"/>
+                                        </div>
+                                        <div style="font-size: 9pt; color: #555; margin-top: 3px;">Date: __________________</div>
                                     </td>
-                                    <td style="width: 32%; border: none !important; text-align: left; vertical-align: top; padding: 0 10px;">
+
+                                    <!-- Spacer Column -->
+                                    <td style="width: 4%; border: none !important;"></td>
+
+                                    <!-- Approved By (Right Column) -->
+                                    <td style="width: 48%; border: none !important; text-align: left; vertical-align: top; padding: 0 0 0 15px;">
                                         <div style="font-weight: bold; font-size: 10pt; border-bottom: 1px solid #333; padding-bottom: 45px; margin-bottom: 6px;">
-                                            Checked By:
+                                            <span t-out="group.get('approved_by_label', 'Approved By:')"/>
                                         </div>
-                                        <div style="font-size: 9pt; color: #333; font-weight: bold;">Finance Manager / Audit</div>
-                                        <div style="font-size: 9pt; color: #555; margin-top: 2px;">Date: __________________</div>
-                                    </td>
-                                    <td style="width: 36%; border: none !important; text-align: left; vertical-align: top; padding: 0 0 0 10px;">
-                                        <div style="font-weight: bold; font-size: 10pt; border-bottom: 1px solid #333; padding-bottom: 45px; margin-bottom: 6px;">
-                                            Approved By:
+                                        <div style="font-size: 9.5pt; color: #111; font-weight: bold;">
+                                            <span t-out="group.get('approved_by_title', 'General Manager (GM)')"/>
                                         </div>
-                                        <div style="font-size: 9pt; color: #333; font-weight: bold;">General Manager (GM)</div>
-                                        <div style="font-size: 9pt; color: #555; margin-top: 2px;">Date: __________________</div>
+                                        <div style="font-size: 9pt; color: #555; margin-top: 3px;">Date: __________________</div>
                                     </td>
                                 </tr>
                             </table>
-                            <div style="margin-top: 12px; text-align: right; font-size: 8.5pt; color: #777;">
-                                [ Official Company Seal / Stamp ]
-                            </div>
+                            <t t-if="group.get('show_seal', True)">
+                                <div style="margin-top: 15px; text-align: right; font-size: 8.5pt; color: #777;">
+                                    <span t-out="group.get('seal_text', '[ Official Company Seal / Stamp ]')"/>
+                                </div>
+                            </t>
+                        </div>
+
+                        <!-- In-page bottom footer for HTML preview -->
+                        <div class="letterhead-page-footer" style="margin-top: 35px; border-top: 1.5px solid #222; padding-top: 5px; text-align: center; font-size: 8.5pt; color: #111; line-height: 1.45; font-family: Arial, Helvetica, sans-serif !important;">
+                            <t t-if="group.get('footer_line_1')">
+                                <div><span t-out="group['footer_line_1']"/></div>
+                            </t>
+                            <t t-if="group.get('footer_line_2')">
+                                <div><span t-out="group['footer_line_2']"/></div>
+                            </t>
+                            <t t-if="group.get('footer_line_3')">
+                                <div><span t-out="group['footer_line_3']"/></div>
+                            </t>
                         </div>
 
                     </t>
