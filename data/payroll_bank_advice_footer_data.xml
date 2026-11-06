@@ -15,6 +15,21 @@
         <field name="show_seal" eval="True"/>
     </record>
 
+    <!-- 1.1 Jimma Head Office (የጅማ ዋና መ/ቤት) -->
+    <record id="footer_config_jimma_head_office" model="payroll.bank.advice.footer.config">
+        <field name="name">Jimma Head Office</field>
+        <field name="sequence">15</field>
+        <field name="classification">jimma_head_office</field>
+        <field name="footer_line_1">Tel No.: +251-115-54-97-84/91/94 FAX: +251-113-69-81-00/</field>
+        <field name="footer_line_2">Jimma Branch, Ethiopia</field>
+        <field name="footer_line_3">E-mail: contact@midroc-ceo.com website: www.midroc-ethiopiagroup.com</field>
+        <field name="prepared_by_label">Prepared By:</field>
+        <field name="prepared_by_title">Jimma Branch HR / Payroll Officer</field>
+        <field name="approved_by_label">Approved By:</field>
+        <field name="approved_by_title">Branch Manager / GM</field>
+        <field name="show_seal" eval="True"/>
+    </record>
+
     <!-- 2. CPW -->
     <record id="footer_config_cpw" model="payroll.bank.advice.footer.config">
         <field name="name">CPW</field>

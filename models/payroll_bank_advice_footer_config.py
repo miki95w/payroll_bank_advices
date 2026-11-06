@@ -4,6 +4,7 @@ from odoo import api, fields, models, _
 
 CLASSIFICATION_SELECTION = [
     ('head_office', 'Head Office (ዋና መ/ቤት)'),
+    ('jimma_head_office', 'Jimma Head Office (የጅማ ዋና መ/ቤት)'),
     ('cpw', 'CPW'),
     ('permanent', 'Farm (የእርሻ)'),
     ('temporary', 'Temporary (ጊዜያዊ)'),
@@ -167,6 +168,10 @@ class PayrollBankAdviceFooterConfig(models.Model):
             'head_office': {
                 'prepared_by_title': 'HR / Payroll Officer',
                 'approved_by_title': 'General Manager (GM)',
+            },
+            'jimma_head_office': {
+                'prepared_by_title': 'Jimma Branch HR / Payroll Officer',
+                'approved_by_title': 'Branch Manager / GM',
             },
             'cpw': {
                 'prepared_by_title': 'CPW Coordinator',
