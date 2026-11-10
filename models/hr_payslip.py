@@ -560,10 +560,14 @@ class HrPayslip(models.Model):
             })
             group_idx += 1
 
+        effective_top_class = target_classification
+        if (not effective_top_class or effective_top_class == 'all') and bank_groups:
+            effective_top_class = bank_groups[0].get('classification')
+
         top_footer_config = self.env['payroll.bank.advice.footer.config'].get_footer_for_classification(
-            target_classification, company_id=company.id
+            effective_top_class, company_id=company.id
         )
-        top_defaults = self.env['payroll.bank.advice.footer.config'].get_default_footer_vals(target_classification)
+        top_defaults = self.env['payroll.bank.advice.footer.config'].get_default_footer_vals(effective_top_class)
         footer_info = {
             'footer_line_1': (top_footer_config.footer_line_1 if top_footer_config else False) or top_defaults['footer_line_1'],
             'footer_line_2': (top_footer_config.footer_line_2 if top_footer_config else False) or top_defaults['footer_line_2'],

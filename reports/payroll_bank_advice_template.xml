@@ -33,11 +33,6 @@
                         font-size: 11pt !important;
                         color: #000000 !important;
                     }
-                    @media print {
-                        .letterhead-page-footer {
-                            display: none;
-                        }
-                    }
                     table.bank-advice-table {
                         width: 100%;
                         border-collapse: collapse !important;
@@ -84,22 +79,17 @@
                         <div style="border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 16px;">
                             <table style="width: 100%; border-collapse: collapse; border: none !important;">
                                 <tr style="border: none !important;">
-                                    <td style="width: 15%; vertical-align: middle; border: none !important; padding: 0;">
+                                    <td style="width: 20%; vertical-align: middle; border: none !important; padding: 0;">
                                         <t t-if="company_info.get('logo_src')">
-                                            <img t-att-src="company_info['logo_src']" style="max-height: 70px; max-width: 130px; display: block;"/>
+                                            <img t-att-src="company_info['logo_src']" style="max-height: 70px; max-width: 160px; display: block;"/>
                                         </t>
                                         <t t-elif="company.logo">
-                                            <img t-att-src="image_data_uri(company.logo)" style="max-height: 70px; max-width: 130px; display: block;"/>
+                                            <img t-att-src="image_data_uri(company.logo)" style="max-height: 70px; max-width: 160px; display: block;"/>
                                         </t>
                                     </td>
-                                    <td style="width: 85%; vertical-align: middle; text-align: left; padding-left: 15px; border: none !important;">
-                                        <div style="font-size: 13pt; font-weight: bold; color: #118B46; letter-spacing: 0.5px;">
+                                    <td style="width: 80%; vertical-align: middle; text-align: left; padding-left: 15px; border: none !important;">
+                                        <div style="font-size: 16pt; font-weight: bold; color: #118B46; letter-spacing: 0.5px;">
                                             <span t-out="company_info.get('company_name') or company.name"/>
-                                        </div>
-                                        <div style="font-size: 9pt; color: #444; margin-top: 2px;">
-                                            <span t-out="company_info.get('company_address')"/>
-                                            <t t-if="company_info.get('company_phone')"> | Tel: <span t-out="company_info.get('company_phone')"/></t>
-                                            <t t-if="company_info.get('company_email')"> | Email: <span t-out="company_info.get('company_email')"/></t>
                                         </div>
                                     </td>
                                 </tr>
@@ -226,20 +216,6 @@
                                 </div>
                             </t>
                         </div>
-
-                        <!-- In-page bottom footer for HTML preview -->
-                        <div class="letterhead-page-footer" style="margin-top: 35px; border-top: 1.5px solid #222; padding-top: 5px; text-align: center; font-size: 8.5pt; color: #111; line-height: 1.45; font-family: Arial, Helvetica, sans-serif !important;">
-                            <t t-if="group.get('footer_line_1')">
-                                <div><span t-out="group['footer_line_1']"/></div>
-                            </t>
-                            <t t-if="group.get('footer_line_2')">
-                                <div><span t-out="group['footer_line_2']"/></div>
-                            </t>
-                            <t t-if="group.get('footer_line_3')">
-                                <div><span t-out="group['footer_line_3']"/></div>
-                            </t>
-                        </div>
-
                     </t>
                 </div>
             </t>
