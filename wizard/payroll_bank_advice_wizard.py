@@ -56,8 +56,13 @@ class PayrollBankAdviceWizard(models.TransientModel):
     ], string='Advice Mode', default='all', required=True)
 
     available_banks = fields.Char(
-        string='Available Banks in Selection',
+        string='Detected Banks in Payslips',
         readonly=True,
+    )
+    bank_id = fields.Many2one(
+        'res.bank',
+        string='Target Bank',
+        help='Select bank from master banks list (e.g. Dashen Bank, Commercial Bank of Ethiopia).',
     )
     target_bank_name = fields.Char(
         string='Bank Name',
@@ -161,41 +166,117 @@ class PayrollBankAdviceWizard(models.TransientModel):
         detected_banks = []
         for slip in slips:
             bank_info = slip._resolve_employee_bank_details(slip.employee_id)
-            bname = bank_info.get('bank_group_key') or bank_info.get('bank_name')
-            if bname and bname not in detected_banks:
+            bname = bank_info.get('bank_group_key')
+            if bname and bname != 'Unassigned' and bname not in detected_banks:
                 detected_banks.append(bname)
 
         if detected_banks:
             res['available_banks'] = ', '.join(detected_banks)
-            first_bank = detected_banks[0]
-            res['target_bank_name'] = first_bank
-            settings = self.env['payroll.bank.advice.settings'].get_bank_settings(first_bank)
-            if settings:
-                res['branch'] = settings.branch or ''
-                res['bank_city'] = settings.bank_city or 'Addis Ababa'
-                res['company_account_number'] = settings.company_account_number or ''
-            else:
-                company_partner = self.env.company.partner_id
-                acc = company_partner.bank_ids.filtered(lambda a: a.bank_id and first_bank.lower() in (a.bank_id.name or '').lower())
-                if acc:
-                    res['company_account_number'] = acc[0].acc_number or ''
-                    res['branch'] = acc[0].bank_id.street or ''
+        else:
+            res['available_banks'] = 'None explicitly assigned on employee profiles (Target Bank will be used)'
 
-        # If footer config has preferred bank account, set it
+        # Determine target bank:
+        chosen_bank_name = False
+        chosen_bank_id = False
+
+        # Priority 1: Check footer config for this classification (e.g. Dashen for Head Office)
         footer_config = self.env['payroll.bank.advice.footer.config'].get_footer_for_classification(
             target_classification, company_id=self.env.company.id
         )
         if footer_config and footer_config.bank_account_id:
-            if footer_config.bank_account_id.acc_number:
-                res['company_account_number'] = footer_config.bank_account_id.acc_number
-            if footer_config.bank_account_id.bank_id and footer_config.bank_account_id.bank_id.name:
-                res['target_bank_name'] = footer_config.bank_account_id.bank_id.name
+            acc = footer_config.bank_account_id
+            if acc.acc_number:
+                res['company_account_number'] = acc.acc_number
+            if acc.bank_id:
+                chosen_bank_id = acc.bank_id.id
+                chosen_bank_name = acc.bank_id.name
+            elif acc.bank_name:
+                chosen_bank_name = acc.bank_name
+
+        # Priority 2: Detected bank from payslips
+        if not chosen_bank_name and detected_banks:
+            chosen_bank_name = detected_banks[0]
+
+        # Priority 3: Active bank advice settings
+        if not chosen_bank_name:
+            settings = self.env['payroll.bank.advice.settings'].search([
+                ('active', '=', True),
+                ('company_id', '=', self.env.company.id)
+            ], limit=1)
+            if settings:
+                chosen_bank_name = settings.default_bank_name
+                if settings.bank_id:
+                    chosen_bank_id = settings.bank_id.id
+                if settings.branch:
+                    res['branch'] = settings.branch
+                if settings.company_account_number:
+                    res['company_account_number'] = settings.company_account_number
+
+        # Priority 4: Commercial Bank of Ethiopia (CBE)
+        if not chosen_bank_name:
+            cbe = self.env['res.bank'].search([('name', 'ilike', 'Commercial Bank of Ethiopia')], limit=1)
+            if cbe:
+                chosen_bank_id = cbe.id
+                chosen_bank_name = cbe.name
+            else:
+                chosen_bank_name = 'Commercial Bank of Ethiopia (CBE)'
+
+        if not chosen_bank_id and chosen_bank_name:
+            bank_rec = self.env['res.bank'].search([('name', 'ilike', chosen_bank_name)], limit=1)
+            if not bank_rec:
+                short = chosen_bank_name.split()[0]
+                bank_rec = self.env['res.bank'].search([('name', 'ilike', short)], limit=1)
+            if bank_rec:
+                chosen_bank_id = bank_rec.id
+
+        res['target_bank_name'] = chosen_bank_name
+        if chosen_bank_id:
+            res['bank_id'] = chosen_bank_id
+
+        # Auto-fill branch & company account from settings or partner bank
+        if not res.get('company_account_number') and chosen_bank_name:
+            settings = self.env['payroll.bank.advice.settings'].get_bank_settings(chosen_bank_name)
+            if settings:
+                res['branch'] = settings.branch or res.get('branch', '')
+                res['bank_city'] = settings.bank_city or 'Addis Ababa'
+                res['company_account_number'] = settings.company_account_number or ''
+            else:
+                company_partner = self.env.company.partner_id
+                acc = company_partner.bank_ids.filtered(lambda a: a.bank_id and chosen_bank_name.lower() in (a.bank_id.name or '').lower())
+                if acc:
+                    res['company_account_number'] = acc[0].acc_number or ''
+                    if acc[0].bank_id.street:
+                        res['branch'] = acc[0].bank_id.street
 
         return res
 
     # -------------------------------------------------------------------------
-    # Onchange: Employee Classification
+    # Onchange: Employee Classification & Bank
     # -------------------------------------------------------------------------
+
+    @api.onchange('bank_id')
+    def _onchange_bank_id(self):
+        if self.bank_id:
+            self.target_bank_name = self.bank_id.name
+            settings = self.env['payroll.bank.advice.settings'].get_bank_settings(self.bank_id.name)
+            if settings:
+                if settings.branch:
+                    self.branch = settings.branch
+                if settings.bank_city:
+                    self.bank_city = settings.bank_city
+                if settings.company_account_number:
+                    self.company_account_number = settings.company_account_number
+            else:
+                company_partner = self.env.company.partner_id
+                acc = company_partner.bank_ids.filtered(
+                    lambda a: a.bank_id and (a.bank_id.id == self.bank_id.id or self.bank_id.name.lower() in (a.bank_id.name or '').lower())
+                )
+                if acc:
+                    self.company_account_number = acc[0].acc_number or ''
+                    if acc[0].bank_id.street:
+                        self.branch = acc[0].bank_id.street
+                elif self.bank_id.street:
+                    self.branch = self.bank_id.street
 
     @api.onchange('employee_classification')
     def _onchange_employee_classification(self):
@@ -215,30 +296,42 @@ class PayrollBankAdviceWizard(models.TransientModel):
         detected_banks = []
         for slip in self.payslip_ids:
             bank_info = slip._resolve_employee_bank_details(slip.employee_id)
-            bname = bank_info.get('bank_group_key') or bank_info.get('bank_name')
-            if bname and bname not in detected_banks:
+            bname = bank_info.get('bank_group_key')
+            if bname and bname != 'Unassigned' and bname not in detected_banks:
                 detected_banks.append(bname)
 
         if detected_banks:
             self.available_banks = ', '.join(detected_banks)
-            if self.target_bank_name not in detected_banks:
-                self.target_bank_name = detected_banks[0]
         else:
-            self.available_banks = ''
+            self.available_banks = 'None explicitly assigned on employee profiles (Target Bank will be used)'
 
-        # 3. Check if footer config specifies a default debit account
+        # 3. Check if footer config specifies a default debit account for this classification
         footer_config = self.env['payroll.bank.advice.footer.config'].get_footer_for_classification(
             self.employee_classification, company_id=self.env.company.id
         )
         if footer_config and footer_config.bank_account_id:
-            if footer_config.bank_account_id.acc_number:
-                self.company_account_number = footer_config.bank_account_id.acc_number
-            if footer_config.bank_account_id.bank_id and footer_config.bank_account_id.bank_id.name:
-                self.target_bank_name = footer_config.bank_account_id.bank_id.name
+            acc = footer_config.bank_account_id
+            if acc.acc_number:
+                self.company_account_number = acc.acc_number
+            if acc.bank_id:
+                self.bank_id = acc.bank_id.id
+                self.target_bank_name = acc.bank_id.name
+            elif acc.bank_name:
+                self.target_bank_name = acc.bank_name
+        elif detected_banks:
+            if self.target_bank_name not in detected_banks:
+                self.target_bank_name = detected_banks[0]
+                bank_rec = self.env['res.bank'].search([('name', 'ilike', detected_banks[0])], limit=1)
+                if bank_rec:
+                    self.bank_id = bank_rec.id
 
     @api.onchange('target_bank_name')
     def _onchange_target_bank_name(self):
         if self.target_bank_name:
+            if not self.bank_id or self.bank_id.name != self.target_bank_name:
+                bank_rec = self.env['res.bank'].search([('name', 'ilike', self.target_bank_name)], limit=1)
+                if bank_rec:
+                    self.bank_id = bank_rec.id
             settings = self.env['payroll.bank.advice.settings'].get_bank_settings(self.target_bank_name)
             if settings:
                 if settings.branch:

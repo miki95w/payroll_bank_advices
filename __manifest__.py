@@ -15,6 +15,7 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'data/res_bank_data.xml',
         'data/payroll_bank_advice_footer_data.xml',
         'wizard/payroll_bank_advice_wizard_views.xml',
         'wizard/payroll_report_wizard_views.xml',

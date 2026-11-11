@@ -7,6 +7,48 @@ import base64
 import datetime
 
 
+# Known Ethiopian Bank Families
+KNOWN_ETHIOPIAN_BANKS = [
+    ('commercial bank of ethiopia', 'Commercial Bank of Ethiopia (CBE)', 'CBE'),
+    ('cbe', 'Commercial Bank of Ethiopia (CBE)', 'CBE'),
+    ('dashen', 'Dashen Bank', 'Dashen'),
+    ('awash', 'Awash International Bank', 'Awash'),
+    ('abyssinia', 'Bank of Abyssinia', 'Abyssinia'),
+    ('boa', 'Bank of Abyssinia', 'Abyssinia'),
+    ('hibret', 'Hibret Bank', 'Hibret'),
+    ('united bank', 'Hibret Bank', 'Hibret'),
+    ('wegagen', 'Wegagen Bank', 'Wegagen'),
+    ('nib', 'Nib International Bank', 'Nib'),
+    ('cooperative bank of oromia', 'Cooperative Bank of Oromia', 'COOP'),
+    ('coop', 'Cooperative Bank of Oromia', 'COOP'),
+    ('lion', 'Lion International Bank', 'Lion'),
+    ('anbessa', 'Lion International Bank', 'Lion'),
+    ('siinqee', 'Siinqee Bank', 'Siinqee'),
+    ('sinquee', 'Siinqee Bank', 'Siinqee'),
+    ('zamzam', 'ZamZam Bank', 'ZamZam'),
+    ('hijra', 'Hijra Bank', 'Hijra'),
+    ('tsedey', 'Tsedey Bank', 'Tsedey'),
+    ('amhara', 'Amhara Bank', 'Amhara'),
+    ('gadaa', 'Gadaa Bank', 'Gadaa'),
+    ('oromia', 'Oromia Bank', 'Oromia'),
+    ('zemen', 'Zemen Bank', 'Zemen'),
+    ('berhan', 'Berhan Bank', 'Berhan'),
+    ('bunna', 'Bunna International Bank', 'Bunna'),
+    ('abay', 'Abay Bank', 'Abay'),
+    ('addis', 'Addis International Bank', 'Addis'),
+    ('enat', 'Enat Bank', 'Enat'),
+    ('global', 'Global Bank Ethiopia', 'Global'),
+    ('telebirr', 'Ethio Telecom (telebirr)', 'telebirr'),
+]
+
+CBE_BRANCHES = [
+    'ashewa tera', 'signal', 'betel', 'addisu gebeya', 'balderas', 'ayat',
+    'bole', 'megenagna', 'sarbet', 'gotera', 'mexico', 'piassa', 'kazanchis',
+    'lebu', 'jemo', 'torhailoch', 'merkato', 'autobis tera', 'meskel flower',
+    'cmc', 'gerji', 'kality', 'akaki', 'hayahulet', '22', '4 kilo', '6 kilo'
+]
+
+
 class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
 
@@ -34,11 +76,13 @@ class HrPayslip(models.Model):
             primary = getattr(employee, 'primary_bank_account_id', False)
             bank_acc = primary or employee.bank_account_ids[0]
 
-        # 3. Check address_home_id (private partner bank accounts)
-        if not bank_acc and hasattr(employee, 'address_home_id') and employee.address_home_id:
-            partner = employee.address_home_id
-            if partner.bank_ids:
-                bank_acc = partner.bank_ids[0]
+        # 3. Check work_contact_id, user_partner_id, address_home_id (partner bank accounts)
+        if not bank_acc:
+            for p_field in ('work_contact_id', 'user_partner_id', 'address_home_id'):
+                partner = getattr(employee, p_field, False)
+                if partner and hasattr(partner, 'bank_ids') and partner.bank_ids:
+                    bank_acc = partner.bank_ids[0]
+                    break
 
         # 4. Check active contracts
         if not bank_acc and hasattr(employee, 'contract_ids') and employee.contract_ids:
@@ -65,70 +109,58 @@ class HrPayslip(models.Model):
         elif hasattr(employee, 'bank_branch') and employee.bank_branch:
             raw_branch = (employee.bank_branch or '').strip()
 
-        # Known Ethiopian Bank Families
-        KNOWN_ETHIOPIAN_BANKS = [
-            ('commercial bank of ethiopia', 'Commercial Bank of Ethiopia (CBE)', 'CBE'),
-            ('cbe', 'Commercial Bank of Ethiopia (CBE)', 'CBE'),
-            ('dashen', 'Dashen Bank', 'Dashen'),
-            ('awash', 'Awash Bank', 'Awash'),
-            ('abyssinia', 'Bank of Abyssinia', 'Abyssinia'),
-            ('boa', 'Bank of Abyssinia', 'Abyssinia'),
-            ('hibret', 'Hibret Bank', 'Hibret'),
-            ('united bank', 'Hibret Bank', 'Hibret'),
-            ('wegagen', 'Wegagen Bank', 'Wegagen'),
-            ('nib', 'Nib International Bank', 'Nib'),
-            ('cooperative bank of oromia', 'Cooperative Bank of Oromia', 'COOP'),
-            ('coop', 'Cooperative Bank of Oromia', 'COOP'),
-            ('lion', 'Lion International Bank', 'Lion'),
-            ('anbessa', 'Lion International Bank', 'Lion'),
-            ('siinqee', 'Siinqee Bank', 'Siinqee'),
-            ('sinquee', 'Siinqee Bank', 'Siinqee'),
-            ('zamzam', 'ZamZam Bank', 'ZamZam'),
-            ('hijra', 'Hijra Bank', 'Hijra'),
-            ('tsedey', 'Tsedey Bank', 'Tsedey'),
-            ('telebirr', 'Ethio Telecom (telebirr)', 'telebirr'),
-        ]
-
-        CBE_BRANCHES = [
-            'ashewa tera', 'signal', 'betel', 'addisu gebeya', 'balderas', 'ayat',
-            'bole', 'megenagna', 'sarbet', 'gotera', 'mexico', 'piassa', 'kazanchis',
-            'lebu', 'jemo', 'torhailoch', 'merkato', 'autobis tera', 'meskel flower',
-            'cmc', 'gerji', 'kality', 'akaki', 'hayahulet', '22', '4 kilo', '6 kilo'
-        ]
-
         raw_lower = raw_bank_name.lower()
         branch_lower = raw_branch.lower()
 
-        bank_group_key = 'Commercial Bank of Ethiopia (CBE)'
-        short_code = 'CBE'
+        bank_group_key = 'Unassigned'
+        short_code = 'ETB'
         branch = raw_branch
+        has_specific_bank = False
 
-        matched = False
-        for pattern, full_name, short in KNOWN_ETHIOPIAN_BANKS:
-            if pattern in raw_lower:
-                bank_group_key = full_name
-                short_code = short
-                matched = True
-                # Extract branch if raw_bank_name has hyphen or space (e.g. CBE-bole or Awash Bole)
-                if '-' in raw_bank_name:
-                    parts = raw_bank_name.split('-', 1)
-                    branch = parts[1].strip().title()
-                elif ' ' in raw_bank_name and pattern in ['cbe', 'awash', 'dashen', 'boa']:
-                    parts = raw_bank_name.split(None, 1)
-                    if len(parts) > 1 and parts[1].lower() not in ['bank', 'of', 'ethiopia']:
+        if raw_bank_name:
+            matched = False
+            for pattern, full_name, short in KNOWN_ETHIOPIAN_BANKS:
+                if pattern in raw_lower:
+                    bank_group_key = full_name
+                    short_code = short
+                    matched = True
+                    has_specific_bank = True
+                    # Extract branch if raw_bank_name has hyphen or space (e.g. CBE-bole or Awash Bole)
+                    if '-' in raw_bank_name:
+                        parts = raw_bank_name.split('-', 1)
                         branch = parts[1].strip().title()
-                break
+                    elif ' ' in raw_bank_name and pattern in ['cbe', 'awash', 'dashen', 'boa']:
+                        parts = raw_bank_name.split(None, 1)
+                        if len(parts) > 1 and parts[1].lower() not in ['bank', 'of', 'ethiopia']:
+                            branch = parts[1].strip().title()
+                    break
 
-        if not matched:
-            # Check if raw_bank_name is itself a known CBE branch name (e.g. Ashewa Tera, Signal, Betel)
-            is_cbe_branch = any(b in raw_lower for b in CBE_BRANCHES)
-            if is_cbe_branch:
+            if not matched:
+                # Check if raw_bank_name is itself a known CBE branch name (e.g. Ashewa Tera, Signal, Betel)
+                is_cbe_branch = any(b in raw_lower for b in CBE_BRANCHES)
+                if is_cbe_branch:
+                    bank_group_key = 'Commercial Bank of Ethiopia (CBE)'
+                    short_code = 'CBE'
+                    branch = raw_bank_name.title()
+                    has_specific_bank = True
+                else:
+                    bank_group_key = raw_bank_name.title()
+                    short_code = raw_bank_name[:6].upper()
+                    has_specific_bank = True
+        elif account_number:
+            clean_acc = account_number.replace(' ', '').replace('-', '')
+            if clean_acc.startswith('1000') and len(clean_acc) >= 12:
                 bank_group_key = 'Commercial Bank of Ethiopia (CBE)'
                 short_code = 'CBE'
-                branch = raw_bank_name.title()
-            elif raw_bank_name:
-                bank_group_key = raw_bank_name.title()
-                short_code = raw_bank_name[:6].upper()
+                has_specific_bank = True
+            else:
+                bank_group_key = 'Unassigned'
+                short_code = 'ETB'
+                has_specific_bank = False
+        else:
+            bank_group_key = 'Unassigned'
+            short_code = 'ETB'
+            has_specific_bank = False
 
         if not branch and raw_branch:
             branch = raw_branch.title()
@@ -143,15 +175,16 @@ class HrPayslip(models.Model):
                 display_branch = branch
             display_bank_branch = f"{short_code} - {display_branch}"
         else:
-            display_bank_branch = bank_group_key
+            display_bank_branch = bank_group_key if bank_group_key != 'Unassigned' else '-'
 
         return {
             'bank_group_key': bank_group_key,
             'short_code': short_code,
-            'bank_name': bank_group_key,
+            'bank_name': bank_group_key if bank_group_key != 'Unassigned' else '',
             'branch': branch or raw_branch or '-',
             'display_bank_branch': display_bank_branch,
             'bank_account_number': account_number or '-',
+            'has_specific_bank': has_specific_bank,
         }
 
     def _get_payslip_data(self):
@@ -429,14 +462,29 @@ class HrPayslip(models.Model):
         if 'print_branch' not in wizard_vals and 'print_branch' in self.env.context:
             print_branch = self.env.context['print_branch']
 
-        # 2. Filter by single bank if requested
+        # 2. Filter / Route by bank mode
         bank_mode = wizard_vals.get('bank_mode', 'all')
         target_bank = wizard_vals.get('target_bank_name')
         if bank_mode == 'single' and target_bank:
-            all_payslip_data = [
-                p for p in all_payslip_data
-                if target_bank.lower() in p['bank_group_key'].lower() or p['bank_group_key'].lower() in target_bank.lower()
-            ]
+            filtered_slips_data = []
+            target_norm = target_bank.lower().replace(' ', '').replace('-', '')
+            for p in all_payslip_data:
+                b_key = (p.get('bank_group_key') or '').lower().replace(' ', '').replace('-', '')
+                # If specific bank selected: include slips matching target bank OR unassigned slips
+                if not b_key or b_key == 'unassigned' or target_norm in b_key or b_key in target_norm:
+                    p_copy = dict(p)
+                    # Assign target bank name to unassigned slips
+                    p_copy['bank_group_key'] = target_bank
+                    p_copy['bank_name'] = target_bank
+                    filtered_slips_data.append(p_copy)
+            all_payslip_data = filtered_slips_data
+        elif bank_mode == 'all':
+            # In 'all' mode: assign unassigned slips to the fallback bank (target_bank, footer default, or CBE)
+            fallback_bank = target_bank or 'Commercial Bank of Ethiopia (CBE)'
+            for p in all_payslip_data:
+                if not p.get('bank_group_key') or p.get('bank_group_key') == 'Unassigned':
+                    p['bank_group_key'] = fallback_bank
+                    p['bank_name'] = fallback_bank
 
         # 3. Group by bank_group_key
         groups_dict = {}
@@ -488,14 +536,23 @@ class HrPayslip(models.Model):
                 first_branch = slips_data[0].get('branch') if slips_data else ''
                 branch = (first_branch + ' Branch') if first_branch and not first_branch.lower().endswith('branch') else (first_branch or 'Main Branch')
 
+            # Derive short_code cleanly from b_key
+            b_short = 'BA'
+            b_norm = b_key.lower()
+            for pattern, full_name, short in KNOWN_ETHIOPIAN_BANKS:
+                if pattern in b_norm:
+                    b_short = short
+                    break
+            if b_short == 'BA' and b_key:
+                b_short = b_key.split()[0].upper()[:6]
+
             # Reference number
             custom_ref = wizard_vals.get('reference_number')
             if custom_ref:
                 reference_number = custom_ref
             else:
                 date_prefix = report_date.strftime('%Y/%m')
-                prefix_clean = (slips_data[0].get('short_code') or ref_prefix).upper()
-                reference_number = f"{prefix_clean}/BA/{date_prefix}/{group_idx:03d}"
+                reference_number = f"{b_short}/BA/{date_prefix}/{group_idx:03d}"
 
             # Prepare sequential item numbers
             numbered_slips = []
@@ -531,7 +588,7 @@ class HrPayslip(models.Model):
 
             bank_groups.append({
                 'bank_name': b_key,
-                'short_code': slips_data[0].get('short_code', 'CBE'),
+                'short_code': b_short,
                 'branch': branch,
                 'bank_city': bank_city,
                 'company_account_number': company_account_number or '___________________',

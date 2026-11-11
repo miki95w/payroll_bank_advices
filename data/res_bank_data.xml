@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Ethiopian Banks Master Data -->
+        <record id="res_bank_cbe" model="res.bank">
+            <field name="name">Commercial Bank of Ethiopia (CBE)</field>
+            <field name="bic">CBETETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_dashen" model="res.bank">
+            <field name="name">Dashen Bank</field>
+            <field name="bic">DASHETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_awash" model="res.bank">
+            <field name="name">Awash International Bank</field>
+            <field name="bic">AWINETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_abyssinia" model="res.bank">
+            <field name="name">Bank of Abyssinia</field>
+            <field name="bic">ABYSETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_wegagen" model="res.bank">
+            <field name="name">Wegagen Bank</field>
+            <field name="bic">WEGAETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_nib" model="res.bank">
+            <field name="name">Nib International Bank</field>
+            <field name="bic">NIBIETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_hibret" model="res.bank">
+            <field name="name">Hibret Bank</field>
+            <field name="bic">UNBKETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_coop" model="res.bank">
+            <field name="name">Cooperative Bank of Oromia</field>
+            <field name="bic">CBORETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_lion" model="res.bank">
+            <field name="name">Lion International Bank</field>
+            <field name="bic">LIBEETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_zemen" model="res.bank">
+            <field name="name">Zemen Bank</field>
+            <field name="bic">ZEMNETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_berhan" model="res.bank">
+            <field name="name">Berhan Bank</field>
+            <field name="bic">BERHETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_bunna" model="res.bank">
+            <field name="name">Bunna International Bank</field>
+            <field name="bic">BUNAETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_abay" model="res.bank">
+            <field name="name">Abay Bank</field>
+            <field name="bic">ABAYETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_addis" model="res.bank">
+            <field name="name">Addis International Bank</field>
+            <field name="bic">ADINETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_enat" model="res.bank">
+            <field name="name">Enat Bank</field>
+            <field name="bic">ENATETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_global" model="res.bank">
+            <field name="name">Global Bank Ethiopia</field>
+            <field name="bic">GLOBETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_siinqee" model="res.bank">
+            <field name="name">Siinqee Bank</field>
+            <field name="bic">SINQETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_zamzam" model="res.bank">
+            <field name="name">ZamZam Bank</field>
+            <field name="bic">ZAMZETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_hijra" model="res.bank">
+            <field name="name">Hijra Bank</field>
+            <field name="bic">HIJRAETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_tsedey" model="res.bank">
+            <field name="name">Tsedey Bank</field>
+            <field name="bic">TSEDETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_amhara" model="res.bank">
+            <field name="name">Amhara Bank</field>
+            <field name="bic">AMHAETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_gadaa" model="res.bank">
+            <field name="name">Gadaa Bank</field>
+            <field name="bic">GADAETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_oromia" model="res.bank">
+            <field name="name">Oromia Bank</field>
+            <field name="bic">OROMETAA</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+
+        <record id="res_bank_telebirr" model="res.bank">
+            <field name="name">Ethio Telecom (telebirr)</field>
+            <field name="bic">TELEBIRR</field>
+            <field name="city">Addis Ababa</field>
+            <field name="country" ref="base.et"/>
+        </record>
+    </data>
+</odoo>
+

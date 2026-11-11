@@ -12,6 +12,11 @@ class PayrollBankAdviceSettings(models.Model):
     # Fields
     # -------------------------------------------------------------------------
 
+    bank_id = fields.Many2one(
+        'res.bank',
+        string='Bank',
+        help='Select bank from master banks list (e.g. Dashen Bank, Commercial Bank of Ethiopia)',
+    )
     default_bank_name = fields.Char(
         string='Bank Name',
         required=True,
@@ -78,9 +83,20 @@ class PayrollBankAdviceSettings(models.Model):
         help='Only active bank configurations are used by the advice generator',
     )
 
+    @api.onchange('bank_id')
+    def _onchange_bank_id(self):
+        if self.bank_id:
+            self.default_bank_name = self.bank_id.name
+            if self.bank_id.street and not self.branch:
+                self.branch = self.bank_id.street
+            if self.bank_id.city:
+                self.bank_city = self.bank_id.city
+
     @api.onchange('bank_account_id')
     def _onchange_bank_account_id(self):
         if self.bank_account_id:
+            if self.bank_account_id.bank_id:
+                self.bank_id = self.bank_account_id.bank_id
             if self.bank_account_id.acc_number:
                 self.company_account_number = self.bank_account_id.acc_number
             if self.bank_account_id.bank_id and self.bank_account_id.bank_id.name:

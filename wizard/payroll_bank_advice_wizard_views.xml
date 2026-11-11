@@ -19,7 +19,7 @@
                             <field name="all_payslip_ids" invisible="1"/>
                             <field name="payslip_count" string="Included Payslips" readonly="1"/>
                             <field name="bank_mode" widget="radio"/>
-                            <field name="available_banks" readonly="1" invisible="not available_banks"/>
+                            <field name="available_banks" string="Detected in Payslips" readonly="1"/>
                         </group>
                         <group string="Letter Details">
                             <field name="subject"/>
@@ -32,6 +32,7 @@
 
                     <group string="Target Bank &amp; Debit Account" invisible="bank_mode != 'single'">
                         <group>
+                            <field name="bank_id" options="{'no_quick_create': True}" placeholder="Search / Select Bank (e.g. Dashen Bank, CBE, Awash)..."/>
                             <field name="target_bank_name" placeholder="e.g. Dashen Bank or Commercial Bank of Ethiopia (CBE)"/>
                             <field name="branch" placeholder="e.g. Ghion Branch, Bole Branch"/>
                             <field name="bank_city"/>

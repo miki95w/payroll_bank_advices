@@ -25,7 +25,11 @@
             <form string="Bank Advice Settings">
                 <sheet>
                     <div class="oe_title">
-                        <label for="default_bank_name" string="Bank Name"/>
+                        <label for="bank_id" string="Select Bank"/>
+                        <h3>
+                            <field name="bank_id" options="{'no_quick_create': True}" placeholder="Search or select bank (e.g. Dashen Bank, CBE)..."/>
+                        </h3>
+                        <label for="default_bank_name" string="Letter Display Bank Name"/>
                         <h1>
                             <field name="default_bank_name"
                                    placeholder="e.g. Commercial Bank of Ethiopia (CBE)"/>

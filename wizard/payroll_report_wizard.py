@@ -49,10 +49,20 @@ class PayrollReportWizard(models.TransientModel):
         string='Employees',
         help='Leave empty to include all employees.',
     )
-    bank_name = fields.Char(
+    bank_id = fields.Many2one(
+        'res.bank',
         string='Filter by Bank',
+        help='Filter by specific bank (e.g. Dashen Bank, Commercial Bank of Ethiopia). Leave empty for all banks.',
+    )
+    bank_name = fields.Char(
+        string='Bank Name / Keyword',
         help='Filter by specific bank name (e.g. CBE, Dashen). Leave empty for all banks.',
     )
+
+    @api.onchange('bank_id')
+    def _onchange_bank_id(self):
+        if self.bank_id:
+            self.bank_name = self.bank_id.name
     separate_sheets_by_bank = fields.Boolean(
         string='Separate Sheets by Bank',
         default=True,

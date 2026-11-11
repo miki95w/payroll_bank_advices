@@ -32,6 +32,7 @@
                         <group string="Filters &amp; Options">
                             <field name="department_ids" widget="many2many_tags" placeholder="All Departments"/>
                             <field name="employee_ids" widget="many2many_tags" placeholder="All Employees"/>
+                            <field name="bank_id" options="{'no_quick_create': True}" placeholder="Select Bank (All if empty)"/>
                             <field name="bank_name" placeholder="e.g. CBE, Dashen (All if empty)"/>
                             <field name="separate_sheets_by_bank"/>
                         </group>
