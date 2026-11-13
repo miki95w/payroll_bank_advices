@@ -8,6 +8,7 @@ CLASSIFICATION_SELECTION = [
     ('all', 'All Classifications'),
     ('head_office', 'Head Office (ዋና መ/ቤት)'),
     ('jimma_head_office', 'Jimma Head Office (የጅማ ዋና መ/ቤት)'),
+    ('bebeka_head_office', 'Bebeka Head Office (የበበቃ ዋና መ/ቤት)'),
     ('cpw', 'CPW'),
     ('permanent', 'Farm (የእርሻ)'),
     ('temporary', 'Temporary (ጊዜያዊ)'),
