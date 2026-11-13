@@ -56,3 +56,4 @@ def gregorian_to_ethiopian(g_date):
 
     jdn = gregorian_to_jdn(g_date.year, g_date.month, g_date.day)
     return jdn_to_ethiopian(jdn)
+
