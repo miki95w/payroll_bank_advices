@@ -8,13 +8,42 @@
             <form string="Payroll Report">
                 <sheet>
                     <div class="oe_title">
-                        <h2>Payroll Report</h2>
+                        <h2><field name="report_title" readonly="0" placeholder="Payroll Report"/></h2>
                         <p class="text-muted">
-                            Generate comprehensive Salary &amp; Deductions breakdown reports in Excel (.xlsx) or PDF format.
+                            Generate comprehensive Salary, Allowance, Deduction, Overtime &amp; Absent reports in Excel (.xlsx) or PDF format.
                         </p>
                     </div>
 
                     <group>
+                        <group string="Report Category &amp; Specific Selection">
+                            <field name="report_category" widget="radio"/>
+
+                            <!-- Specific Allowance Picker -->
+                            <field name="allowance_rule_ids"
+                                   widget="many2many_tags"
+                                   invisible="report_category != 'allowance'"
+                                   options="{'no_create': True}"
+                                   placeholder="Pick specific allowances (Leave empty for All Allowances)"/>
+
+                            <!-- Specific Deduction Picker -->
+                            <field name="deduction_rule_ids"
+                                   widget="many2many_tags"
+                                   invisible="report_category != 'deduction'"
+                                   options="{'no_create': True}"
+                                   placeholder="Pick specific deductions e.g. Oil Deduction, Floor Deduction (Leave empty for Oil Deduction)"/>
+
+                            <!-- Attendance Sub-Options -->
+                            <field name="attendance_sub_type"
+                                   widget="radio"
+                                   invisible="report_category != 'attendance'"/>
+                            
+                            <div class="o_row" colspan="2" invisible="report_category == 'all'">
+                                <span class="fw-bold me-2">Ethiopian Period:</span>
+                                <field name="ethiopian_month" class="oe_inline me-2"/>
+                                <field name="ethiopian_year" class="oe_inline" placeholder="Year e.g. 2019"/>
+                            </div>
+                        </group>
+
                         <group string="Period &amp; Source">
                             <field name="filter_by" widget="radio"/>
                             <field name="payslip_run_id"
@@ -28,13 +57,30 @@
                                 <field name="date_to" required="filter_by == 'date'"/>
                             </div>
                             <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="only_with_values" invisible="report_category == 'all'"/>
                         </group>
-                        <group string="Filters &amp; Options">
+                    </group>
+
+                    <group string="Filters &amp; Options">
+                        <group>
                             <field name="department_ids" widget="many2many_tags" placeholder="All Departments"/>
                             <field name="employee_ids" widget="many2many_tags" placeholder="All Employees"/>
+                        </group>
+                        <group>
                             <field name="bank_id" options="{'no_quick_create': True}" placeholder="Select Bank (All if empty)"/>
                             <field name="bank_name" placeholder="e.g. CBE, Dashen (All if empty)"/>
-                            <field name="separate_sheets_by_bank"/>
+                            <field name="separate_sheets_by_bank" invisible="report_category != 'all'"/>
+                        </group>
+                    </group>
+
+                    <group string="Approval Signatures (Footer)" invisible="report_category == 'all'">
+                        <group>
+                            <field name="prepared_by" placeholder="e.g. Payroll Officer Name"/>
+                            <field name="checked_by" placeholder="e.g. Finance Specialist Name"/>
+                        </group>
+                        <group>
+                            <field name="verified_by" placeholder="e.g. HR / Finance Manager Name"/>
+                            <field name="approved_by" placeholder="e.g. General Manager Name"/>
                         </group>
                     </group>
                 </sheet>
@@ -69,31 +115,6 @@
         name="Payroll Report"
         parent="hr_payroll.menu_hr_payroll_report"
         action="action_payroll_report_wizard"
-        sequence="15"
-        groups="hr_payroll.group_hr_payroll_user"
-    />
+        sequence="30"/>
 
-    <!-- Contextual Action on Payslip Batches (Payslip Runs) -->
-    <record id="action_payslip_run_open_payroll_report" model="ir.actions.server">
-        <field name="name">Payroll Report (Excel)</field>
-        <field name="model_id" ref="hr_payroll.model_hr_payslip_run"/>
-        <field name="binding_model_id" ref="hr_payroll.model_hr_payslip_run"/>
-        <field name="binding_view_types">list,form</field>
-        <field name="state">code</field>
-        <field name="code">
-action = records.action_open_payroll_report()
-        </field>
-    </record>
-
-    <!-- Contextual Action on Payslips -->
-    <record id="action_payslip_open_payroll_report" model="ir.actions.server">
-        <field name="name">Payroll Report (Excel)</field>
-        <field name="model_id" ref="hr_payroll.model_hr_payslip"/>
-        <field name="binding_model_id" ref="hr_payroll.model_hr_payslip"/>
-        <field name="binding_view_types">list</field>
-        <field name="state">code</field>
-        <field name="code">
-action = records.action_open_payroll_report()
-        </field>
-    </record>
 </odoo>
