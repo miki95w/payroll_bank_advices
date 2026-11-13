@@ -26,6 +26,7 @@
         'views/hr_employee_views.xml',
         'reports/payroll_bank_advice_report.xml',
         'reports/payroll_bank_advice_template.xml',
+        'reports/monthly_payroll_report_templates.xml',
     ],
     'demo': [],
     'installable': True,

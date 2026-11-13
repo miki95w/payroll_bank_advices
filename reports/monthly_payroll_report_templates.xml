@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_monthly_payroll_template">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 11px; color: #000;">
+                    
+                    <!-- Internal CSS -->
+                    <style>
+                        table.report-grid {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border: 1px solid #000;
+                            margin-top: 12px;
+                            margin-bottom: 20px;
+                        }
+                        table.report-grid th, table.report-grid td {
+                            border: 1px solid #000;
+                            padding: 3px 5px;
+                            vertical-align: middle;
+                        }
+                        table.report-grid th {
+                            font-weight: bold;
+                            text-align: center;
+                            background-color: #fcfcfc;
+                        }
+                        table.report-grid td.text-center { text-align: center; }
+                        table.report-grid td.text-left { text-align: left; }
+                        table.report-grid td.text-right { text-align: right; }
+                        .report-title {
+                            font-size: 19px;
+                            font-weight: bold;
+                            text-align: center;
+                            margin-bottom: 14px;
+                            text-transform: none;
+                        }
+                        .signatures-block {
+                            margin-top: 35px;
+                            width: 100%;
+                            page-break-inside: avoid;
+                        }
+                        .sign-item {
+                            display: inline-block;
+                            width: 24%;
+                            font-weight: bold;
+                            font-size: 11px;
+                        }
+                        .sign-line {
+                            display: block;
+                            margin-top: 4px;
+                            font-weight: normal;
+                            border-bottom: 1px solid #000;
+                            width: 85%;
+                            min-height: 18px;
+                            text-align: center;
+                        }
+                        .page-break {
+                            page-break-after: always;
+                        }
+                    </style>
+
+                    <!-- 1. OVERTIME REPORT SECTION -->
+                    <t t-if="(report_type == 'overtime' and ot_data) or (report_type == 'all' and ot_data)">
+                        <div class="report-title">
+                            <span t-esc="report_title"/>
+                        </div>
+
+                        <table class="report-grid">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" style="width: 4%;">No.</th>
+                                    <th rowspan="2" style="width: 20%;">Name</th>
+                                    <th rowspan="2" style="width: 10%;">salary</th>
+                                    <th colspan="2" style="width: 16%;">Normal Hour</th>
+                                    <th colspan="2" style="width: 16%;">Night Hour</th>
+                                    <th colspan="2" style="width: 16%;">Weekend hour</th>
+                                    <th colspan="2" style="width: 16%;">Holiday Hour</th>
+                                    <th rowspan="2" style="width: 8%;">Total</th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 6%;">Hour</th>
+                                    <th style="width: 10%;">Amount</th>
+                                    <th style="width: 6%;">Hour</th>
+                                    <th style="width: 10%;">Amount</th>
+                                    <th style="width: 6%;">Hour</th>
+                                    <th style="width: 10%;">Amount</th>
+                                    <th style="width: 6%;">Hour</th>
+                                    <th style="width: 10%;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="ot_data['rows']" t-as="row">
+                                    <tr>
+                                        <td class="text-center"><span t-esc="row['no']"/></td>
+                                        <td class="text-left"><span t-esc="row['name']"/></td>
+                                        <td class="text-right"><span t-esc="'{:,.2f}'.format(row['salary'])"/></td>
+                                        <td class="text-right"><span t-esc="'{:.2f}'.format(row['norm_h'])"/></td>
+                                        <td class="text-right"><span t-esc="'{:,.2f}'.format(row['norm_amt'])"/></td>
+                                        <td class="text-right"><span t-esc="'{:.2f}'.format(row['night_h'])"/></td>
+                                        <td class="text-right"><span t-esc="'{:,.2f}'.format(row['night_amt'])"/></td>
+                                        <td class="text-right"><span t-esc="'{:.2f}'.format(row['wk_h'])"/></td>
+                                        <td class="text-right"><span t-esc="'{:,.2f}'.format(row['wk_amt'])"/></td>
+                                        <td class="text-right"><span t-esc="'{:.2f}'.format(row['hol_h'])"/></td>
+                                        <td class="text-right"><span t-esc="'{:,.2f}'.format(row['hol_amt'])"/></td>
+                                        <td class="text-right font-weight-bold"><span t-esc="'{:,.2f}'.format(row['total'])"/></td>
+                                    </tr>
+                                </t>
+                                <!-- Total Row -->
+                                <tr style="font-weight: bold; background-color: #f7f7f7;">
+                                    <td colspan="2" class="text-right">Total</td>
+                                    <td class="text-right"><span t-esc="'{:,.2f}'.format(ot_data['totals']['tot_salary'])"/></td>
+                                    <td class="text-right"><span t-esc="'{:.2f}'.format(ot_data['totals']['tot_norm_h'])"/></td>
+                                    <td class="text-right"><span t-esc="'{:,.2f}'.format(ot_data['totals']['tot_norm_amt'])"/></td>
+                                    <td class="text-right"><span t-esc="'{:.2f}'.format(ot_data['totals']['tot_night_h'])"/></td>
+                                    <td class="text-right"><span t-esc="'{:,.2f}'.format(ot_data['totals']['tot_night_amt'])"/></td>
+                                    <td class="text-right"><span t-esc="'{:.2f}'.format(ot_data['totals']['tot_wk_h'])"/></td>
+                                    <td class="text-right"><span t-esc="'{:,.2f}'.format(ot_data['totals']['tot_wk_amt'])"/></td>
+                                    <td class="text-right"><span t-esc="'{:.2f}'.format(ot_data['totals']['tot_hol_h'])"/></td>
+                                    <td class="text-right"><span t-esc="'{:,.2f}'.format(ot_data['totals']['tot_hol_amt'])"/></td>
+                                    <td class="text-right"><span t-esc="'{:,.2f}'.format(ot_data['totals']['tot_grand'])"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Signatures Footer -->
+                        <div class="signatures-block">
+                            <div class="sign-item">
+                                Prepared BY:
+                                <span class="sign-line"><t t-esc="prepared_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Checked BY:
+                                <span class="sign-line"><t t-esc="checked_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Verified BY:
+                                <span class="sign-line"><t t-esc="verified_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Approved By:
+                                <span class="sign-line"><t t-esc="approved_by or ''"/></span>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- PAGE BREAK IF ALL IN ONE -->
+                    <t t-if="report_type == 'all'">
+                        <div class="page-break"/>
+                    </t>
+
+                    <!-- 2. ALLOWANCE REPORT SECTION -->
+                    <t t-if="report_type in ('allowance', 'all') and alw_data">
+                        <div class="report-title">
+                            <span t-esc="report_title"/>
+                        </div>
+
+                        <table class="report-grid">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" style="width: 4%;">No</th>
+                                    <th rowspan="2" style="width: 24%;">Employee</th>
+                                    <th t-att-colspan="len(alw_data['columns'])">Allowance</th>
+                                    <th rowspan="2" style="width: 12%;">Total</th>
+                                </tr>
+                                <tr>
+                                    <t t-foreach="alw_data['columns']" t-as="col">
+                                        <th style="min-width: 80px;"><span t-esc="col['title']"/></th>
+                                    </t>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="alw_data['rows']" t-as="row">
+                                    <tr>
+                                        <td class="text-center"><span t-esc="row['no']"/></td>
+                                        <td class="text-left"><span t-esc="row['name']"/></td>
+                                        <t t-foreach="alw_data['columns']" t-as="col">
+                                            <td class="text-right">
+                                                <t t-if="row['values'][col['key']] &gt; 0">
+                                                    <span t-esc="'{:,.2f}'.format(row['values'][col['key']])"/>
+                                                </t>
+                                            </td>
+                                        </t>
+                                        <td class="text-right font-weight-bold"><span t-esc="'{:,.2f}'.format(row['total'])"/></td>
+                                    </tr>
+                                </t>
+                                <!-- Total Row -->
+                                <tr style="font-weight: bold; background-color: #f7f7f7;">
+                                    <td colspan="2" class="text-right">Total</td>
+                                    <t t-foreach="alw_data['columns']" t-as="col">
+                                        <td class="text-right"><span t-esc="'{:,.2f}'.format(alw_data['col_totals'][col['key']])"/></td>
+                                    </t>
+                                    <td class="text-right"><span t-esc="'{:,.2f}'.format(alw_data['grand_total'])"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Signatures Footer -->
+                        <div class="signatures-block">
+                            <div class="sign-item">
+                                Prepared BY:
+                                <span class="sign-line"><t t-esc="prepared_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Checked BY:
+                                <span class="sign-line"><t t-esc="checked_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Verified BY:
+                                <span class="sign-line"><t t-esc="verified_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Approved By:
+                                <span class="sign-line"><t t-esc="approved_by or ''"/></span>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- PAGE BREAK IF ALL IN ONE -->
+                    <t t-if="report_type == 'all'">
+                        <div class="page-break"/>
+                    </t>
+
+                    <!-- 3. ABSENT LIST REPORT SECTION -->
+                    <t t-if="(report_type in ('absent', 'all') and abs_data) or (report_type == 'overtime' and attendance_report_type in ('absent', 'both') and abs_data)">
+                        <div class="report-title">
+                            <span t-esc="report_title if report_type == 'absent' else 'Absent list for the Month'"/>
+                        </div>
+
+                        <table class="report-grid">
+                            <thead>
+                                <tr>
+                                    <th style="width: 6%;">No.</th>
+                                    <th style="width: 34%;">Name</th>
+                                    <th style="width: 20%;">Basic salary</th>
+                                    <th style="width: 18%;">Absent days</th>
+                                    <th style="width: 22%;">Absent deduction</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="abs_data['rows']" t-as="row">
+                                    <tr>
+                                        <td class="text-center"><span t-esc="row['no']"/></td>
+                                        <td class="text-left"><span t-esc="row['name']"/></td>
+                                        <td class="text-right"><span t-esc="'{:,.2f}'.format(row['salary'])"/></td>
+                                        <td class="text-right"><span t-esc="'{:.1f}'.format(row['absent_days'])"/></td>
+                                        <td class="text-right font-weight-bold"><span t-esc="'{:,.2f}'.format(row['absent_deduction'])"/></td>
+                                    </tr>
+                                </t>
+                                <!-- Total Row -->
+                                <tr style="font-weight: bold; background-color: #f7f7f7;">
+                                    <td colspan="2" class="text-right">Total</td>
+                                    <td class="text-right"><span t-esc="'{:,.2f}'.format(abs_data['totals']['tot_salary'])"/></td>
+                                    <td class="text-right"><span t-esc="'{:.1f}'.format(abs_data['totals']['tot_days'])"/></td>
+                                    <td class="text-right"><span t-esc="'{:,.2f}'.format(abs_data['totals']['tot_deduction'])"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Signatures Footer -->
+                        <div class="signatures-block">
+                            <div class="sign-item">
+                                Prepared BY:
+                                <span class="sign-line"><t t-esc="prepared_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Checked BY:
+                                <span class="sign-line"><t t-esc="checked_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Verified BY:
+                                <span class="sign-line"><t t-esc="verified_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Approved By:
+                                <span class="sign-line"><t t-esc="approved_by or ''"/></span>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- PAGE BREAK IF ALL IN ONE -->
+                    <t t-if="report_type == 'all'">
+                        <div class="page-break"/>
+                    </t>
+
+                    <!-- 4. DEDUCTION REPORT SECTION -->
+                    <t t-if="report_type in ('deduction', 'all') and ded_data">
+                        <div class="report-title">
+                            <span t-esc="report_title"/>
+                        </div>
+
+                        <!-- Single Deduction layout -->
+                        <t t-if="ded_data['is_single']">
+                            <table class="report-grid" style="max-width: 700px; margin-left: auto; margin-right: auto;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 10%; background-color: #C8D6AF;">No</th>
+                                        <th style="width: 55%; background-color: #C8D6AF;">Employee</th>
+                                        <th style="width: 35%; background-color: #C8D6AF;"><span t-esc="ded_data['rule_label']"/></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="ded_data['rows']" t-as="row">
+                                        <tr>
+                                            <td class="text-center"><span t-esc="row['no']"/></td>
+                                            <td class="text-left"><span t-esc="row['name']"/></td>
+                                            <td class="text-right font-weight-bold"><span t-esc="'{:,.2f}'.format(row['amount'])"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Total Row -->
+                                    <tr style="font-weight: bold; background-color: #f7f7f7;">
+                                        <td colspan="2" class="text-right">Total</td>
+                                        <td class="text-right"><span t-esc="'{:,.2f}'.format(ded_data['tot_amt'])"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Multi-Deduction layout -->
+                        <t t-if="not ded_data['is_single']">
+                            <table class="report-grid">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" style="width: 4%; background-color: #C8D6AF;">No</th>
+                                        <th rowspan="2" style="width: 24%; background-color: #C8D6AF;">Employee</th>
+                                        <th t-att-colspan="len(ded_data['columns'])" style="background-color: #C8D6AF;">Deductions</th>
+                                        <th rowspan="2" style="width: 12%; background-color: #C8D6AF;">Total</th>
+                                    </tr>
+                                    <tr>
+                                        <t t-foreach="ded_data['columns']" t-as="col">
+                                            <th style="min-width: 80px; background-color: #C8D6AF;"><span t-esc="col['title']"/></th>
+                                        </t>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="ded_data['rows']" t-as="row">
+                                        <tr>
+                                            <td class="text-center"><span t-esc="row['no']"/></td>
+                                            <td class="text-left"><span t-esc="row['name']"/></td>
+                                            <t t-foreach="ded_data['columns']" t-as="col">
+                                                <td class="text-right">
+                                                    <t t-if="row['values'][col['key']] &gt; 0">
+                                                        <span t-esc="'{:,.2f}'.format(row['values'][col['key']])"/>
+                                                    </t>
+                                                </td>
+                                            </t>
+                                            <td class="text-right font-weight-bold"><span t-esc="'{:,.2f}'.format(row['total'])"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Total Row -->
+                                    <tr style="font-weight: bold; background-color: #f7f7f7;">
+                                        <td colspan="2" class="text-right">Total</td>
+                                        <t t-foreach="ded_data['columns']" t-as="col">
+                                            <td class="text-right"><span t-esc="'{:,.2f}'.format(ded_data['col_totals'][col['key']])"/></td>
+                                        </t>
+                                        <td class="text-right"><span t-esc="'{:,.2f}'.format(ded_data['grand_total'])"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Signatures Footer -->
+                        <div class="signatures-block">
+                            <div class="sign-item">
+                                Prepared BY:
+                                <span class="sign-line"><t t-esc="prepared_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Checked BY:
+                                <span class="sign-line"><t t-esc="checked_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Verified BY:
+                                <span class="sign-line"><t t-esc="verified_by or ''"/></span>
+                            </div>
+                            <div class="sign-item">
+                                Approved By:
+                                <span class="sign-line"><t t-esc="approved_by or ''"/></span>
+                            </div>
+                        </div>
+                    </t>
+
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
