@@ -2,3 +2,8 @@ __pycache__/
 *.pyc
 *.pyo
 
+
+# Python compiled files and cache directories
+__pycache__/
+*.py[cod]
+*$py.class
